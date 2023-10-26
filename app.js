@@ -1,9 +1,11 @@
 const {connectDb} = require('./database/index');
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const dotenv = require("dotenv");
+dotenv.config();
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');

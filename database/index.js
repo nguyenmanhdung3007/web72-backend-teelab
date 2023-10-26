@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const connectDb = async () => {
     try {
-        await mongoose.connect('mongodb+srv://Web72:Caohung1311@cluster0.hasa2kf.mongodb.net/Teelab-DB')
+        await mongoose.connect(process.env.MONGODB_URL)
         .then( () => {
             console.log('Connect succeeded DB')
         })
