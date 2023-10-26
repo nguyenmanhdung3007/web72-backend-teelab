@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const Order = mongoose.Schema({
+const order = mongoose.Schema({
     orderedBy: {
         type: mongoose.Types.ObjectId,
         ref: "users",
@@ -24,7 +24,7 @@ const Order = mongoose.Schema({
         type: String,
         enum: ["pending", "canceled", "delivering"]
     }
-}, {timesstamp: true})
+}, {timestamps: true})
 
-module.exports =  mongoose.Model("orders", Order)
+module.exports =  mongoose.Model("orders", order)
 

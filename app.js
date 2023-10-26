@@ -1,14 +1,19 @@
 const {connectDb} = require('./database/index');
+
+const dotenv = require("dotenv");
+dotenv.config();
+const morgan = require('morgan');
+const cors = require('cors');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+=======
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cors = require('cors');
 
-
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
