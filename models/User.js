@@ -1,6 +1,6 @@
 
 
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 
 const User = mongoose.Schema({
@@ -9,6 +9,10 @@ const User = mongoose.Schema({
         required: true
     },
     password: {
+        type: String,
+        require: true
+    },
+    email: {
         type: String,
         require: true
     },
@@ -45,7 +49,7 @@ const User = mongoose.Schema({
 //     }
 // }
 //     //Ecommerce
+
 // )
 
-
-export default mongoose.model("Users", User)
+module.exports =  mongoose.model("Users", User)
