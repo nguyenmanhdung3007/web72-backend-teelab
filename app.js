@@ -1,14 +1,13 @@
 const {connectDb} = require('./database/index');
-const dotenv = require('dotenv');
+
+const dotenv = require("dotenv");
+dotenv.config();
 const morgan = require('morgan');
 const cors = require('cors');
-
-
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
 
 var indexRouter = require('./routes/index');
 
@@ -24,7 +23,6 @@ app.use(cors({ origin: "*"}))
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

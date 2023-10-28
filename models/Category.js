@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const Caterory = mongoose.Schema({
+const caterory = mongoose.Schema({
     name: {
         type: 'string',
         required: true
@@ -11,4 +11,4 @@ const Caterory = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('categories', Caterory)
+module.exports = mongoose.model('categories', caterory)
