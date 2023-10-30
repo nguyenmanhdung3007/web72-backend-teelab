@@ -1,17 +1,27 @@
 const {connectDb} = require('./database/index');
+
 const dotenv = require("dotenv");
 dotenv.config();
+const morgan = require('morgan');
+const cors = require('cors');
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
+
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+dotenv.config();
+app.use(express.json())
 connectDb();
+
+app.use(morgan("combined"))
+app.use(cors({ origin: "*"}))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
