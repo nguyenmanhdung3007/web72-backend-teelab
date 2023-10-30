@@ -13,12 +13,22 @@ const order = mongoose.Schema({
                 type: mongoose.Types.ObjectId,
                 ref: "products",
             },
-            quantity: {
-                type: Number,
-                default: 1
-            }
+            quantity: {type: Number, default: 1},
+            thumbnail: {type: String,},
+            price: {type: String, required: true},
         }
     ],
+    shippingAddress: {
+        address: {type: String, required: true}
+        district: {type: String, required: true}
+        city: {type: String, required: true}
+    },
+    paymentMethod: {
+        type: String,
+        required: true,
+        defautlt: "Thanh toán khi nhận hàng",
+    },
+    
 
     status: {
         type: String,

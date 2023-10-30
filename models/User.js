@@ -23,9 +23,9 @@ const User = mongoose.Schema({
         type: String,
     },
     shippingAddress: {
-        address: {type: String, require: true}
-        district: {type: String, require: true}
-        city: {type: String, require: true}
+        address: {type: String, required: true}
+        district: {type: String, required: true}
+        city: {type: String, required: true}
     },
 }, {timestamps: true})
 
