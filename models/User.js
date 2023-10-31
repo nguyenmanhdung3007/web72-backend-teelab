@@ -1,6 +1,6 @@
 
 
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 
 const User = mongoose.Schema({
@@ -18,16 +18,17 @@ const User = mongoose.Schema({
     },
     phone: {
         type: Number,
-    },
+        require: true,
+    }, 
     avatar: {
         type: String,
     },
     shippingAddress: {
-        address: {type: String, required: true}
-        district: {type: String, required: true}
-        city: {type: String, required: true}
+        address: {type: String, required: true},
+        district: {type: String, required: true},
+        city: {type: String, required: true},
     },
-}, {timestamps: true})
 
+}, { timestamps: true })
 
-export default mongoose.model("Users", User)
+module.exports = mongoose.model("Users", User)
