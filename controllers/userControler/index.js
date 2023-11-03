@@ -1,14 +1,15 @@
 const bcrypt = require("bcryptjs")
-const jwt = require('jsonwebtoken');
 
-const Users = require('../models/User.js');
+const Users = require('../../models/User.js');
 const Joi = require('joi');
+const { generateAccessToken, generateRefreshToken } = require("../../middlewares/authenticator.js");
+const userModel = require("../../models/User.js")
 
 const login = async (req, res) => {
     const { password, email } = req.body;
 
     const emailExist = await Users.findOne({ email })
-    console.log(emailExist)
+    // console.log(emailExist)
 
     if (!emailExist) {
         return res.status(400).json("Người dùng không tồn tại");
@@ -19,18 +20,16 @@ const login = async (req, res) => {
         return res.status(400).json("Sai mật khẩu");
     }
 
-    const token = jwt.sign({
-        id: emailExist.id
-    }
-        , process.env.JWT_SECRET_KEY,
-        {
-            expiresIn: "30m"
-        }
-    )
+    //create access token,refresh token
+    const accessToken = generateAccessToken(emailExist._id)
+    const refreshToken = generateRefreshToken(emailExist._id)
+
+    await Users.findByIdAndUpdate(emailExist._id, {refreshToken});
 
     return res.status(201).json({
         email: email,
-        token: token
+        accessToken: accessToken,
+        refreshToken: refreshToken
     })
 }
 
@@ -53,7 +52,7 @@ const register = async (req, res) => {
                     /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/ // Mindx123@
                 )
             , phone: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Phone number must have 10 digits.` })
-            .required()
+                .required()
             , shippingAddress: {
                 address: Joi.string(),
             },
@@ -106,8 +105,57 @@ const getAllUser = async (req, res) => {
     return res.status(200).json({ user: users });
 };
 
+const updateUser = async (req, res) => {
+    const id = req.params.id;
+    console.log(id)
+
+    const body = req.body;
+        const Schema = Joi.object({
+            email: Joi.string()
+                .email({
+                    minDomainSegments: 2,
+                    tlds: { allow: ["com", "net"] }
+                })
+                , username: Joi.string()
+            , password: Joi.string()
+                .regex(
+                    /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/ // Mindx123@
+                )
+            , phone: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Phone number must have 10 digits.` })
+            , shippingAddress: {
+                address: Joi.string(),
+            },
+            birth_year: Joi.number()
+                .integer()
+                .min(1900)
+                .max(2013)
+            ,
+            shippingAddress: {
+                address: Joi.string(),
+                district: Joi.string(),
+                city: Joi.string()
+            }
+
+        }).unknown(true)
+
+
+        const { error } = Schema.validate(body)
+        if (error) {
+            res.status(400);
+            console.log(error.message)
+            throw new Error("Email hoặc mật khẩu không hợp lệ.")
+        }
+        // console.log()
+
+        const Result  = await userModel.findByIdAndUpdate(id, body, {new: true} );
+    
+        console.log(Result)
+        
+};
+
 module.exports = {
     login,
     register,
-    getAllUser
+    getAllUser,
+    updateUser
 }

@@ -2,18 +2,19 @@ const {connectDb} = require('./database/index');
 
 const dotenv = require("dotenv");
 dotenv.config();
-const morgan = require('morgan');
-const cors = require('cors');
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
+const morgan = require('morgan');
+const cors = require('cors');
+
+
 var indexRouter = require('./routes/index');
 
 var app = express();
-dotenv.config();
 app.use(express.json())
 app.use(fileUpload());
 connectDb();

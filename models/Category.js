@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
 
-const caterory = mongoose.Schema({
+const categoryModel = mongoose.Schema({
     name: {
-        type: 'string',
+        type: String,
         required: true
     },
     slug: {
         type: String,
         required: true
-    }
-})
+    },
+}, {timestamps: true})
 
-module.exports = mongoose.model('categories', caterory)
+module.exports = mongoose.model('categories', categoryModel)
