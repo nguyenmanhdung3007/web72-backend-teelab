@@ -24,7 +24,7 @@ const login = async (req, res) => {
     const accessToken = generateAccessToken(emailExist._id)
     const refreshToken = generateRefreshToken(emailExist._id)
 
-    await Users.findByIdAndUpdate(emailExist._id, {refreshToken});
+    await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
 
     return res.status(201).json({
         email: email,
@@ -94,7 +94,7 @@ const register = async (req, res) => {
 
         const newUser = await Users.create(body);
 
-        return res.status(201).send("Thêm mới thành công User: \n" + newUser)
+        return res.status(201).json({ "Thêm mới thành công User: \n": newUser })
     } catch (error) {
         res.status(400).json(error.message);
     }
@@ -106,17 +106,18 @@ const getAllUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const id = req.params.id;
-    console.log(id)
+    try {
+        const id = req.params.id;
+        console.log(id)
 
-    const body = req.body;
+        const body = req.body;
         const Schema = Joi.object({
             email: Joi.string()
                 .email({
                     minDomainSegments: 2,
                     tlds: { allow: ["com", "net"] }
                 })
-                , username: Joi.string()
+            , username: Joi.string()
             , password: Joi.string()
                 .regex(
                     /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/ // Mindx123@
@@ -138,24 +139,56 @@ const updateUser = async (req, res) => {
 
         }).unknown(true)
 
-
         const { error } = Schema.validate(body)
         if (error) {
             res.status(400);
             console.log(error.message)
             throw new Error("Email hoặc mật khẩu không hợp lệ.")
         }
-        // console.log()
+        const sath = await bcrypt.genSalt(10);
+        const newPass = await bcrypt.hash(body.password, sath)
+        body.password = newPass;
 
-        const Result  = await userModel.findByIdAndUpdate(id, body, {new: true} );
-    
-        console.log(Result)
+        const Result = await userModel.findByIdAndUpdate(id, body, { new: true });
+
+        return res.status(201).json({
+            message: " Cập nhật sản phẩm thành công",
+            status: 'success',
+            user: Result
+        })
+    } catch (error) {
+       
+    }
+};
+
+const deleteUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const productDeleted = await userModel.findByIdAndDelete(id);
         
+        if(productDeleted) {
+            return res.status(200).json({
+                message: "Xóa sản phẩm thành công",
+                status: "success",
+                productDeleted: productDeleted
+            })
+        } else {
+            return res.status(200).json({
+                message: "Sản phẩm đã được xóa trước đó",
+                status: "falle",
+                productDeleted: productDeleted
+            })
+        }
+    } catch (error) {
+        res.status(400)
+        throw new Error(error);
+    }
 };
 
 module.exports = {
     login,
     register,
     getAllUser,
-    updateUser
+    updateUser,
+    deleteUser
 }
