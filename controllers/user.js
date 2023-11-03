@@ -52,6 +52,24 @@ const register = async (req, res) => {
                 .regex(
                     /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/ // Mindx123@
                 )
+            , phone: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Phone number must have 10 digits.` })
+            .required()
+            , shippingAddress: {
+                address: Joi.string(),
+            },
+            birth_year: Joi.number()
+                .integer()
+                .min(1900)
+                .max(2013)
+            ,
+            shippingAddress: {
+                address: Joi.string()
+                    .required(),
+                district: Joi.string()
+                    .required(),
+                city: Joi.string()
+                    .required(),
+            }
 
         }).unknown(true)
 

@@ -8,12 +8,14 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 
 var indexRouter = require('./routes/index');
 
 var app = express();
 dotenv.config();
 app.use(express.json())
+app.use(fileUpload());
 connectDb();
 
 app.use(morgan("combined"))

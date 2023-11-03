@@ -8,6 +8,10 @@ const User = mongoose.Schema({
         type: String,
         required: true,
     },
+    birth_year: {
+        type: Number,
+    }
+    ,
     password: {
         type: String,
         required: true,
@@ -17,7 +21,7 @@ const User = mongoose.Schema({
         default: "customer"
     },
     phone: {
-        type: Number,
+        type: String,
         require: true,
     }, 
     avatar: {
