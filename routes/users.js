@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, getAllUser, updateUser, deleteUser, refeshToken } = require('../controllers/userControler/index.js');
+const { login, register, getAllUser, updateUser, deleteUser, refeshToken, logOut } = require('../controllers/userControler/index.js');
 const {authentication} = require('../middlewares/authenticator.js');
 const { authorization } = require('../middlewares/authorization.js');
 const userRouter = express.Router();
@@ -14,7 +14,7 @@ userRouter.put("/:id",authentication,authorization, updateUser)
 userRouter.delete("/:id",authentication, authorization, deleteUser)    
 userRouter.get("/",authentication,authorization, getAllUser)
 userRouter.get("/refeshToken/:id", refeshToken)  
-userRouter.detete("/logout", logOut)
+userRouter.delete("/logout/:id", logOut)
 
 
 module.exports = userRouter;
