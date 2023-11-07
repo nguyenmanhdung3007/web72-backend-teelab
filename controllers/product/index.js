@@ -6,7 +6,10 @@ const { productSchema, variantSchema } = require("../product/validation.js");
 
 const getProduct = async (req, res) => {
   try {
-    const products = await productModel.find();
+    const products = await productModel
+      .find()
+      .populate("category")
+      .populate("variants");
 
     return res.status(200).json({ products });
   } catch (error) {
