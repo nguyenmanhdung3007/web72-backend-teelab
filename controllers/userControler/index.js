@@ -204,7 +204,8 @@ const refeshToken = async (req, res) => {
 
 const logOut = async (req, res) => {
     try {
-        
+        const id = req.params.id;
+        console.log(id)
     } catch (error) {
         
     }
@@ -216,5 +217,6 @@ module.exports = {
     getAllUser,
     updateUser,
     deleteUser,
-    refeshToken
+    refeshToken, 
+    logOut
 }
