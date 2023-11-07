@@ -105,7 +105,7 @@ const getAllUser = async (req, res) => {
     return res.status(200).json({ user: users });
 };
 
-const updateUser = async (req, res) => {
+const   updateUser = async (req, res) => {
     try {
         const id = req.params.id;
         console.log(id)
@@ -195,6 +195,7 @@ const refeshToken = async (req, res) => {
         res.status(201).json({
             refreshToken: refreshToken,
             status: 'success',
+            user: userExits
         })
     } catch (error) {
         res.status(400);
@@ -205,9 +206,16 @@ const refeshToken = async (req, res) => {
 const logOut = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log(id)
+        const userExits = await userModel.findById(id);
+
+        const result = await userModel.findByIdAndUpdate(id, {...userExits, refreshToken: ''}) ;
+        return res.status(201).json({
+            user: result,
+            status: "success"
+        });
     } catch (error) {
-        
+        console.log(error.message)
+        return res.status(400).json(error.message)
     }
 };
 

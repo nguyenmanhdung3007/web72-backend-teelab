@@ -36,5 +36,5 @@ const order = mongoose.Schema({
     }
 }, {timestamps: true})
 
-module.exports =  mongoose.Model("orders", order)
+module.exports =  mongoose.model("orders", order)
 

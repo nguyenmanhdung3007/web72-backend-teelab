@@ -14,7 +14,7 @@ userRouter.put("/:id",authentication,authorization, updateUser)
 userRouter.delete("/:id",authentication, authorization, deleteUser)    
 userRouter.get("/",authentication,authorization, getAllUser)
 userRouter.get("/refeshToken/:id", refeshToken)  
-userRouter.delete("/logout/:id", logOut)
+userRouter.delete("/logout/:id" ,logOut)
 
 
 module.exports = userRouter;
