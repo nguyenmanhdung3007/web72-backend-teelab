@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const order = mongoose.Schema({
+const orderModel = mongoose.Schema({
     orderedBy: {
         type: mongoose.Types.ObjectId,
         ref: "users",
@@ -9,32 +9,30 @@ const order = mongoose.Schema({
 
     orderDetail: [
         {
-            product: {
+            variant: {
                 type: mongoose.Types.ObjectId,
-                ref: "products",
+                ref: "variants",
             },
             quantity: {type: Number, default: 1},
-            thumbnail: {type: String,},
-            price: {type: String, required: true},
         }
     ],
     shippingAddress: {
-        address: {type: String, required: true}
-        district: {type: String, required: true}
+        address: {type: String, required: true},
+        district: {type: String, required: true},
         city: {type: String, required: true}
     },
     paymentMethod: {
         type: String,
         required: true,
-        defautlt: "Thanh toán khi nhận hàng",
+        defautlt: "1",
     },
     
 
     status: {
         type: String,
-        enum: ["pending", "canceled", "delivering"]
+        enum: ["0", "1", "2"]
     }
 }, {timestamps: true})
 
-module.exports =  mongoose.Model("orders", order)
+module.exports =  mongoose.model("orders", orderModel)
 

@@ -1,12 +1,16 @@
-const  mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-const variantModel = new mongoose.Schema({
-    productId: { type: mongoose.Types.ObjectId, ref: "product" },
-    image: [{type: String}],
-    price: { type: Number,},
-    color: { type: String,},
-    size: { type: String,},
-    counInStock: { type: Number,}
-}, {timestamps: true})
+const variantModel = new mongoose.Schema(
+  {
+    productId: { type: mongoose.Types.ObjectId, ref: "products" },
+    name: { type: String },
+    image: { type: String },
+    price: { type: Number },
+    color: { type: String },
+    size: { type: String },
+    countInStock: { type: Number},
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("variants", variantModel)
+module.exports = mongoose.model("variants", variantModel);
