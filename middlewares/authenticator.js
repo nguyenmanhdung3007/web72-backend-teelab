@@ -3,7 +3,7 @@ const userModel = require('../models/User.js')
 
 const generateAccessToken = (id) => {
     const token = jwt.sign({ id: id }, process.env.JWT_SECRET_KEY, { // id+secretKey => 1102abc
-        expiresIn: "24h",
+        expiresIn: "3m",
     });
     return token;
 };
@@ -37,6 +37,9 @@ const authentication = async (req, res, next) => {
 
     } catch (error) {
         console.log(error)
+        res.status(400).json({
+           " Phiên đăng nhập bạn đã hết hạn"
+        })
     }
 };
 
