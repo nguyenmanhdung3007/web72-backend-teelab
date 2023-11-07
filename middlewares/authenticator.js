@@ -37,9 +37,7 @@ const authentication = async (req, res, next) => {
 
     } catch (error) {
         console.log(error)
-        res.status(400).json({
-           " Phiên đăng nhập bạn đã hết hạn"
-        })
+        res.status(400).json(" Phiên đăng nhập bạn đã hết hạn")
     }
 };
 
