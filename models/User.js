@@ -12,6 +12,10 @@ const User = mongoose.Schema({
         type: Number,
     }
     ,
+    refreshToken: {
+        type: String,
+    }
+    ,
     userName: {
         type: String,
     },
