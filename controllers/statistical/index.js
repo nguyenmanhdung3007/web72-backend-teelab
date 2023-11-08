@@ -1,11 +1,14 @@
 // const OrderModel = require('../../models/Order')
-const orders = require('../../models/Order.js');
+const orderModel = require('../../models/Order.js');
 
 const productRevenue = async (req, res) => {
     try {
-        const result = await orders.find({})
-        console.log(result)
-        return res.status(200).json(result)
+        const result = await orderModel.find({})
+        console.log(result.length)
+        return res.status(200).json({
+            order: result,
+            countOrder: result.length
+        })
     } catch (error) {
 
     }
