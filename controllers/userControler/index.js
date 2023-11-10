@@ -102,7 +102,16 @@ const register = async (req, res) => {
 
 const getAllUser = async (req, res) => {
     const users = await Users.find({});
-    return res.status(200).json({ user: users });
+    users.sort();
+
+    for (const key in users) {
+       console.log(users[key].createdAt?.getDate());
+    }
+
+    return res.status(200).json({ 
+        user: users,
+        countUser: users.length
+    });
 };
 
 const updateUser = async (req, res) => {
@@ -211,6 +220,19 @@ const logOut = async (req, res) => {
     }
 };
 
+const getUserById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const result = await Users.findById(id);
+        return res.status(200).json({
+            user: result,
+            status: 'success'
+        })
+    } catch (error) {
+        
+    }
+}
+
 module.exports = {
     login,
     register,
@@ -218,5 +240,6 @@ module.exports = {
     updateUser,
     deleteUser,
     refeshToken, 
-    logOut
+    logOut,
+    getUserById
 }
