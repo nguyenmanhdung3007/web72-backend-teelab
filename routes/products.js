@@ -17,7 +17,7 @@ router.post("/create-category", createCategory);
 router.post("/:id", createProduct);
 router.post("/create-variant/:id", createVariant);
 
-
+//router update
 router.delete("/:id", deleteProduct);
 
 
