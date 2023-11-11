@@ -29,15 +29,14 @@ const User = mongoose.Schema({
     },
     phone: {
         type: String,
-        require: true,
     }, 
     avatar: {
         type: String,
     },
     shippingAddress: {
-        address: {type: String, required: true},
-        district: {type: String, required: true},
-        city: {type: String, required: true},
+        address: {type: String},
+        district: {type: String},
+        city: {type: String},
     },
 
 }, { timestamps: true })
