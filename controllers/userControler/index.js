@@ -6,31 +6,36 @@ const { generateAccessToken, generateRefreshToken } = require("../../middlewares
 const userModel = require("../../models/User.js")
 
 const login = async (req, res) => {
-    const { password, email } = req.body;
+    try {
+        const { password, email } = req.body;
 
-    const emailExist = await Users.findOne({ email })
-    // console.log(emailExist)
+        const emailExist = await Users.findOne({ email })
 
-    if (!emailExist) {
-        return res.status(400).json("Người dùng không tồn tại");
+        if (!emailExist) {
+            return res.status(400).json("Người dùng không tồn tại");
+        }
+
+        const checkPassword = bcrypt.compareSync(password, emailExist.password)
+        if (!checkPassword) {
+            return res.status(400).json("Sai mật khẩu");
+        }
+
+        //create access token,refresh token
+        const accessToken = generateAccessToken(emailExist._id)
+        const refreshToken = generateRefreshToken(emailExist._id)
+
+        console.log(accessToken)
+        await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
+        
+        return res.status(201).json({
+            // email: email,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        })
+    } catch (error) {
+        return res.status(400).json({ message: error.message})
     }
-
-    const checkPassword = bcrypt.compareSync(password, emailExist.password)
-    if (!checkPassword) {
-        return res.status(400).json("Sai mật khẩu");
-    }
-
-    //create access token,refresh token
-    const accessToken = generateAccessToken(emailExist._id)
-    const refreshToken = generateRefreshToken(emailExist._id)
-
-    await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
-
-    return res.status(201).json({
-        email: email,
-        accessToken: accessToken,
-        refreshToken: refreshToken
-    })
+    
 }
 
 
@@ -46,28 +51,22 @@ const register = async (req, res) => {
                 })
                 .required()
             , username: Joi.string()
-                .required()
             , password: Joi.string()
                 .regex(
                     /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/ // Mindx123@
                 )
-            , phone: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Phone number must have 10 digits.` })
                 .required()
-            , shippingAddress: {
-                address: Joi.string(),
-            },
+            , phone: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Phone number must have 10 digits.` })
+            , 
             birth_year: Joi.number()
                 .integer()
                 .min(1900)
                 .max(2013)
             ,
             shippingAddress: {
-                address: Joi.string()
-                    .required(),
-                district: Joi.string()
-                    .required(),
-                city: Joi.string()
-                    .required(),
+                address: Joi.string(),
+                district: Joi.string(),
+                city: Joi.string(),
             }
 
         }).unknown(true)
@@ -101,16 +100,30 @@ const register = async (req, res) => {
 }
 
 const getAllUser = async (req, res) => {
-    const users = await Users.find({});
-    users.sort();
 
-    return res.status(200).json({ 
-        user: users,
-        countUser: users.length
-    });
+    try {
+        const pageSize = req.query.pageSize || 5
+        const pageIndex = req.query.pageIndex || 1
+
+        // console.log(pageSize, pageIndex)
+
+        const users = await Users.find({}).skip(pageSize * pageIndex - pageSize).limit(pageSize);
+
+        // console.log(users)
+        return res.status(200).json({
+            user: users,
+            countUser: users.length
+        });
+    } catch (error) {
+        return res.status(400).json({
+            
+        })
+    }
+
+    
 };
 
-const   updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
     try {
         const id = req.params.id;
         console.log(id)
@@ -162,7 +175,7 @@ const   updateUser = async (req, res) => {
             user: Result
         })
     } catch (error) {
-       
+
     }
 };
 
@@ -170,8 +183,8 @@ const deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
         const productDeleted = await userModel.findByIdAndDelete(id);
-        
-        if(productDeleted) {
+
+        if (productDeleted) {
             return res.status(200).json({
                 message: "Xóa sản phẩm thành công",
                 status: "success",
@@ -190,7 +203,7 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const refeshToken = async (req, res) => { 
+const refeshToken = async (req, res) => {
     try {
         const id = req.params.id;
         // console.log(id)
@@ -213,7 +226,7 @@ const logOut = async (req, res) => {
         const id = req.params.id;
         const userExits = await userModel.findById(id);
 
-        const result = await userModel.findByIdAndUpdate(id, {...userExits, refreshToken: ''}) ;
+        const result = await userModel.findByIdAndUpdate(id, { ...userExits, refreshToken: '' });
         return res.status(201).json({
             user: result,
             status: "success"
@@ -233,7 +246,7 @@ const getUserById = async (req, res) => {
             status: 'success'
         })
     } catch (error) {
-        
+
     }
 }
 
@@ -243,7 +256,7 @@ module.exports = {
     getAllUser,
     updateUser,
     deleteUser,
-    refeshToken, 
+    refeshToken,
     logOut,
     getUserById
 }
