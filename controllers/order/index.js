@@ -51,7 +51,6 @@ const createOrder = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
-
     const order = await orderModel.findById(orderId).populate("orderDetail");
 
     return res.status(200).json({ order });
