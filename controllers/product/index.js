@@ -15,7 +15,7 @@ const getProduct = async (req, res) => {
       .populate("variants")
       .skip(pageSize * pageIndex - pageSize)
       .limit(pageSize);
-      const count = await productModel.countDocuments();
+    const count = await productModel.countDocuments();
 
     return res.status(200).json({ products, count, totalPage });
   } catch (error) {
@@ -303,19 +303,48 @@ const getPagingProduct = async (req, res) => {
 
 const getProductByCategory = async (req, res) => {
   try {
-    const category = req.body;
+    const category = req.query.category;
+    console.log(category);
     const pageSize = req.query.pageSize || 10; // So luong phan tu trong 1 trang
     const pageIndex = req.query.pageIndex || 1;
 
     const product = await productModel
-      .find({category: category})
-      .populate({ path: "category" }, { path: "variants" })
+      .find({ category: category })
+      .populate("variants")
+      .populate("category")
       .skip(pageSize * pageIndex - pageSize)
       .limit(pageSize);
+    console.log(product);
+    const count = await productModel.countDocuments(product);
+    const totalPage = Math.ceil(count / pageSize);
 
-    return res.status(200).json({ product });
+    return res.status(200).json(product, count, totalPage);
   } catch (error) {
-    return res.status(500).json(error);
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+
+
+const getByCategory = async (req, res) => {
+  try {
+    const category = req.query.category;
+    console.log(category);
+    const pageSize = req.query.pageSize || 10; // So luong phan tu trong 1 trang
+    const pageIndex = req.query.pageIndex || 1;
+
+    const product = await productModel
+      .find({ category: category })
+      .populate("variants")
+      .populate("category")
+      .skip(pageSize * pageIndex - pageSize)
+      .limit(pageSize);
+    console.log(product);
+    const count = await productModel.countDocuments(product);
+    const totalPage = Math.ceil(count / pageSize);
+
+    return res.status(200).json(product, count, totalPage);
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed" });
   }
 };
 
@@ -331,4 +360,5 @@ module.exports = {
   deleteProduct,
   deleteVariant,
   getPagingProduct,
+  getProductByCategory,
 };
