@@ -27,10 +27,37 @@ const getOrdersToday = async (req, res) => {
                 orderToday.push(allOrder[key]);
             }
         }
+
+         // ==============================
+         const variantsValue = await variantModel.find({})
+         // console.log(variantsValue)
+         let sumTotal = 0;
+ 
+ 
+         for (const value of orderToday) {
+             const ListOrder = value.orderDetail
+             const status = value?.status
+ 
+             for (const variantItem of ListOrder) {
+ 
+                 for (const value of variantsValue) {
+                     //    console.log(value.id)
+                     if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+                         sumTotal += value.price * variantItem.quantity
+                     }
+                 }
+ 
+             }
+         }
+         //==========================================
+
         return res.status(201).json({
             orderToday: orderToday,
             status: 'success',
-            today: dayNow
+            today: dayNow,
+            sumTotal: sumTotal,
+            countOrderToday: orderToday.length,
+
         })
     } catch (error) {
         return res.status(400).json({
@@ -43,6 +70,7 @@ const getOrderDate = async (req, res) => {
     try {
         const param = req.query
         const date = param.day;
+
         const allOrder = await orderModel.find({})
         const orderToday = [];
 
@@ -60,12 +88,14 @@ const getOrderDate = async (req, res) => {
 
         for (const value of orderToday) {
             const ListOrder = value.orderDetail
-            for (const variantItem of ListOrder) { 
+            const status = value?.status
 
-                for (const value of variantsValue) { 
+            for (const variantItem of ListOrder) {
+
+                for (const value of variantsValue) {
                     //    console.log(value.id)
-                    if (variantItem.variant == value.id) {
-                        sumTotal += value.price
+                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+                        sumTotal += value.price * variantItem.quantity
                     }
                 }
 
@@ -115,12 +145,14 @@ const getOrderMonth = async (req, res) => {
 
         for (const value of orderMonth) {
             const ListOrder = value.orderDetail
-            for (const variantItem of ListOrder) { 
+            const status = value?.status
 
-                for (const value of variantsValue) { 
+            for (const variantItem of ListOrder) {
+
+                for (const value of variantsValue) {
                     //    console.log(value.id)
-                    if (variantItem.variant == value.id) {
-                        sumTotal += value.price
+                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+                        sumTotal += value.price * variantItem.quantity;
                     }
                 }
 
@@ -169,12 +201,14 @@ const getOrderYear = async (req, res) => {
 
         for (const value of orderYear) {
             const ListOrder = value.orderDetail
-            for (const variantItem of ListOrder) { 
+            const status = value?.status
 
-                for (const value of variantsValue) { 
+            for (const variantItem of ListOrder) {
+
+                for (const value of variantsValue) {
                     //    console.log(value.id)
-                    if (variantItem.variant == value.id) {
-                        sumTotal += value.price
+                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+                        sumTotal += value.price * variantItem.quantity
                     }
                 }
 
