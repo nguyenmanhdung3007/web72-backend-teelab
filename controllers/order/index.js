@@ -39,6 +39,7 @@ const createOrder = async (req, res) => {
       shippingAddress: input.shippingAddress,
       orderDetail: input.orderDetail,
       paymentMethod: input.paymentMethod,
+      status: input.status,
     });
     return res
       .status(201)
@@ -47,15 +48,38 @@ const createOrder = async (req, res) => {
     console.log(error);
   }
 };
-
-const updateStatus = async (req, res) => {
+const getOrderById = async (req, res) => {
   try {
-    const status = req.body;
     const orderId = req.params.id;
-    const order = orderModel.findByIdAndUpdate(orderId, status, {new: true,});
+
+    const order = await orderModel.findById(orderId).populate("orderDetail");
+
+    return res.status(200).json({ order });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
 
-module.exports = { createOrder };
+const updateOrder = async (req, res) => {
+  // Check xem status nếu = "0" thì mới cho update
+
+  // chỉ cho thay đổi địa chỉ giao hàng
+};
+
+const updateStatusOrder = async (req, res) => {
+  try {
+    const status = req.body;
+    const orderId = req.params.id;
+    const order = orderModel.findByIdAndUpdate(orderId, status, { new: true });
+    return res.status(200).json({ message: "update status thành công", order });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+
+
+const deleteOrder = async (req, res) => {
+  // check status nếu bằng = mới cho delete và kiểm tra hoàn tiền
+}
+
+module.exports = { createOrder, updateStatusOrder, getOrderById };

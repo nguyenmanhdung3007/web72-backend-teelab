@@ -2,16 +2,22 @@ const productModel = require("../../models/Product.js");
 const joi = require("joi");
 const variantModel = require("../../models/Variant.js");
 const categoryModel = require("../../models/Category.js");
-const { productSchema, variantSchema } = require("../product/validation.js");
+const { productSchema, variantSchema } = require("./validation.js");
+const orderModel = require("../../models/Order.js");
 
 const getProduct = async (req, res) => {
   try {
+    const pageSize = req.query.pageSize || 10;
+    const pageIndex = req.query.pageIndex || 1;
     const products = await productModel
       .find()
       .populate("category")
-      .populate("variants");
+      .populate("variants")
+      .skip(pageSize * pageIndex - pageSize)
+      .limit(pageSize);
+      const count = await productModel.countDocuments();
 
-    return res.status(200).json({ products });
+    return res.status(200).json({ products, count, totalPage });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ error: error.message || "Failed" });
@@ -24,8 +30,7 @@ const getProductById = async (req, res) => {
 
     const product = await productModel
       .findById(productId)
-      .populate("category")
-      .populate("variants");
+      .populate({ path: "category" }, { path: "variants" });
 
     return res.status(200).json({ product });
   } catch (error) {
@@ -113,6 +118,7 @@ const updateProduct = async (req, res) => {
       detailProduct,
       variant,
     } = req.body;
+
     const product = productModel.findByIdAndUpdate();
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
@@ -177,7 +183,7 @@ const updateVariant = async (req, res) => {
         product.countInStock - preVariantCountInStock + updated.countInStock;
       await product.save();
     }
-    if (!(JSON.stringify(product._id) === JSON.stringify(updated.productId))) {
+    if (JSON.stringify(product._id) === JSON.stringify(updated.productId)) {
       const productChanged = await productModel.findById(updated.productId);
       // Xóa variant trong product cũ + bớt productCountInStock
       product.countInStock -= variant.countInStock;
@@ -191,6 +197,8 @@ const updateVariant = async (req, res) => {
       productChanged.countInStock += updated.countInStock;
       await productChanged.save();
       // console.log(arrayVariant);
+
+      // Thêm cả logic cho đơn hàng khi chỉnh sửa giá mà variant có trong order
     }
     return res
       .status(200)
@@ -201,9 +209,50 @@ const updateVariant = async (req, res) => {
 };
 
 const deleteProduct = async (req, res) => {
-  const productId = req.params.id;
   try {
-    const product = await productModel.findByIdAndDelete({ _id: id });
+    const productId = req.params.id;
+
+    const product = await productModel.findById(productId);
+    // kiểm tra xem có tồn tại product k
+    if (!product) {
+      return res.status(400).json({ message: "Sản phẩm không tồn tại" });
+    }
+
+    console.log(product.variants);
+
+    // Check xem sản phẩm có tồn tại trong đơn hàng hay không?
+    for (let i = 0; i < product.variants.length; i++) {
+      const element = product.variants[i];
+      const productInOrder = await orderModel.find({
+        orderDetail: {
+          $elemMatch: {
+            variant: element,
+          },
+        },
+        status: { $in: ["2", "1"] },
+      });
+
+      const isProductInOrder = productInOrder.length != 0 ? true : false;
+      console.log(isProductInOrder);
+      if (productInOrder) {
+        console.log(1);
+      } else {
+        console.log(2);
+      }
+      if (isProductInOrder) {
+        return res.status(400).json({
+          success: false,
+          message: "Có sản phẩm đang tồn tại trong đơn hàng",
+        });
+      }
+      // Nếu không có thì xóa cả các variant bên trong product
+      // const variant = await variantModel.findByIdAndDelete(element);
+      console.log("xóa các variant bên trong product");
+    }
+
+    // const productDeleted = await productModel.findByIdAndDelete({
+    //   _id: productId,
+    // });
     return res.status(200).json({ message: "Xoa san pham thanh cong" });
   } catch (error) {
     console.log(error);
@@ -216,7 +265,13 @@ const deleteVariant = async (req, res) => {
   const variant = await variantModel.findById(variantId);
   const product = await productModel.findById(variant.productId);
   try {
-    const variantDeleted = await variantModel.findByIdAndDelete({ _id: id });
+    // check variant có trong order không
+
+    // Xóa variant
+    const variantDeleted = await variantModel.findByIdAndDelete({
+      _id: variantId,
+    });
+    // trừ sản phẩm trong product
     product.countInStock -= variant.countInStock;
     await product.save();
     return res.status(200).json({ message: "Xoa san pham thanh cong" });
@@ -228,12 +283,12 @@ const deleteVariant = async (req, res) => {
 
 const getPagingProduct = async (req, res) => {
   try {
-    const pageSize = req.query.pageSize || 5; // So luong phan tu trong 1 trang
+    const pageSize = req.query.pageSize || 10; // So luong phan tu trong 1 trang
     const pageIndex = req.query.pageIndex || 1; // So trang
 
     const product = await productModel
       .find()
-      .populate({ path: "createdBy", select: "-password" })
+      .populate({ path: "variants" }, { path: "category" })
       .skip(pageSize * pageIndex - pageSize)
       .limit(pageSize);
     const count = await productModel.countDocuments();
@@ -243,6 +298,24 @@ const getPagingProduct = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+
+const getProductByCategory = async (req, res) => {
+  try {
+    const category = req.body;
+    const pageSize = req.query.pageSize || 10; // So luong phan tu trong 1 trang
+    const pageIndex = req.query.pageIndex || 1;
+
+    const product = await productModel
+      .find({category: category})
+      .populate({ path: "category" }, { path: "variants" })
+      .skip(pageSize * pageIndex - pageSize)
+      .limit(pageSize);
+
+    return res.status(200).json({ product });
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };
 
