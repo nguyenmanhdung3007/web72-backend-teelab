@@ -33,11 +33,11 @@ const login = async (req, res) => {
     })
 }
 
-const register = async (req, res) => {
 
+
+const register = async (req, res) => {
     try {
         const body = req.body;
-
         const Schema = Joi.object({
             email: Joi.string()
                 .email({
@@ -185,10 +185,38 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const refeshToken = async (req, res) => { 
+    try {
+        const id = req.params.id;
+        // console.log(id)
+        const userExits = await userModel.findById(id);
+        const refreshToken = userExits.refreshToken;
+
+        res.status(201).json({
+            refreshToken: refreshToken,
+            status: 'success',
+        })
+    } catch (error) {
+        res.status(400);
+        throw new Error(error.message)
+    }
+}
+
+const logOut = async (req, res) => {
+    try {
+        const id = req.params.id;
+        console.log(id)
+    } catch (error) {
+        
+    }
+};
+
 module.exports = {
     login,
     register,
     getAllUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    refeshToken, 
+    logOut
 }
