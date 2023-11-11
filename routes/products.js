@@ -7,11 +7,13 @@ const {
   getProduct,
   deleteProduct,
   getPagingProduct,
+  getProductByCategory,
 } = require("../controllers/product");
 
-router.get("/", getProduct);
-router.get("/:id", getProductById);
+// router.get("/", getProduct);
+router.get('/get-by-category', getProductByCategory)
 router.get('/get-paging', getPagingProduct)
+router.get("/:id", getProductById);
 
 router.post("/create-category", createCategory);
 router.post("/:id", createProduct);
