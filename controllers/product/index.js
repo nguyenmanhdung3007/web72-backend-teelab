@@ -5,6 +5,20 @@ const categoryModel = require("../../models/Category.js");
 const { productSchema, variantSchema } = require("./validation.js");
 const orderModel = require("../../models/Order.js");
 
+
+
+const getAllProduct = async (req, res) => {
+  try {
+    const products = await productModel
+    .find()
+    .populate("category")
+    .populate("variants"); 
+    return res.status(200).json({ products});
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
 const getAllProductPaging = async (req, res) => {
   try {
     const pageSize = req.query.pageSize || 10;
@@ -190,6 +204,7 @@ const deleteProduct = async (req, res) => {
 
 
 module.exports = {
+  getAllProduct,
   getAllProductPaging,
   getProductById,
   createProduct,

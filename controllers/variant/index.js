@@ -50,7 +50,7 @@ const createVariant = async (req, res) => {
     });
 
     product.variants.push(newVariant._id);
-    product.countInStock = product.countInStock + newVariant.countInStock;
+    product.countInStock += newVariant.countInStock;
     console.log(product.countInStock);
     await product.save();
     return res
