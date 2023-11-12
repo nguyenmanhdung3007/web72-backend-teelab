@@ -5,10 +5,10 @@ const variantModel = new mongoose.Schema(
     productId: { type: mongoose.Types.ObjectId, ref: "products" },
     name: { type: String },
     image: { type: String },
-    price: {
+    priceDetail: {
       price: { type: Number, required: true },
-      saleRatio: { type: Number, required: true },
-      priceAfterSale: {type: Number ,required: true},
+      saleRatio: { type: Number, },
+      priceAfterSale: { type: Number, },
     },
     color: { type: String },
     size: { type: String },

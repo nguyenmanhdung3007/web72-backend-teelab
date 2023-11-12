@@ -5,9 +5,9 @@ const productModel = mongoose.Schema(
     name: { type: String, required: true },
     slug: { type: String, required: true },
     priceDetail: {
-      price: { type: Number, required: true },
-      saleRatio: { type: Number, required: true },
-      priceAfterSale: {type: Number ,required: true},
+      price: { type: Number, },
+      saleRatio: { type: Number, },
+      priceAfterSale: { type: Number, },
     },
     category: {
       type: mongoose.Types.ObjectId,
@@ -29,7 +29,6 @@ const productModel = mongoose.Schema(
   {
     timestamps: true,
   }
-  // Economic
 );
 
 module.exports = mongoose.model("products", productModel);
