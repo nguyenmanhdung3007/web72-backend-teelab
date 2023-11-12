@@ -15,6 +15,7 @@ const createOrder = async (req, res) => {
   }
 
   try {
+    let totalPrice = 0;
     for (let i = 0; i < input.orderDetail.length; i++) {
       const variantId = input.orderDetail[i].variant;
       const variant = await variantModel.findById(variantId);
@@ -25,6 +26,18 @@ const createOrder = async (req, res) => {
         variant.countInStock -= input.orderDetail[i].quantity;
         const product = await productModel.findById(variant.productId);
         product.countInStock -= input.orderDetail[i].quantity;
+        console.log(!variant.priceDetail.saleRatio);
+        if (!variant.priceDetail.saleRatio) {
+          console.log(variant.priceDetail.price);
+          const price =
+            variant.priceDetail.price * input.orderDetail[i].quantity;
+          console.log(price);
+        }
+
+        const price =
+          variant.priceDetail.priceAfterSale * input.orderDetail[i].quantity;
+
+        Math.round((totalPrice += price));
         await variant.save();
         await product.save();
       } else {
@@ -40,12 +53,15 @@ const createOrder = async (req, res) => {
       orderDetail: input.orderDetail,
       paymentMethod: input.paymentMethod,
       status: input.status,
+      totalPrice: totalPrice,
     });
-    return res
-      .status(201)
-      .json({ order: newOrder, message: "Tao order thanh cong" });
+
+    return res.status(201).json({
+      order: newOrder,
+      message: "Tao order thanh cong",
+    });
   } catch (error) {
-    console.log(error);
+    return res.status(400).json({ error: error.message || "Failed" });
   }
 };
 const getOrderById = async (req, res) => {
@@ -94,4 +110,9 @@ const getPagingOrder = async (req, res) => {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
-module.exports = { createOrder, updateStatusOrder, getOrderById, getPagingOrder };
+module.exports = {
+  createOrder,
+  updateStatusOrder,
+  getOrderById,
+  getPagingOrder,
+};

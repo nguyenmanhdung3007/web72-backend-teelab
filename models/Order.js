@@ -27,6 +27,7 @@ const orderModel = mongoose.Schema(
       required: true,
       defautlt: "1",
     },
+    totalPrice: { type: Number, default: 0 },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date },
     status: {

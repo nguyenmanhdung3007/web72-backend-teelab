@@ -8,7 +8,12 @@ const orderModel = require("../../models/Order.js");
 const getVariantById = async (req, res) => {
   try {
     const variantId = req.params.id;
-
+    if (!variantId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The variantId is required",
+      });
+    }
     const variant = await variantModel
       .findById(variantId)
       .populate("productId");
@@ -27,11 +32,11 @@ const createVariant = async (req, res) => {
     return res.status(400).json({ message: "product chưa tồn tại" });
   }
   try {
-    const { name, image, price, color, size, countInStock } = req.body;
+    const { name, image, priceDetail, color, size, countInStock } = req.body;
 
     const validate = variantSchema.validate({
       name,
-      price,
+      priceDetail,
       color,
       size,
       countInStock,
@@ -39,23 +44,34 @@ const createVariant = async (req, res) => {
     if (validate.error) {
       return res.status(400).jon({ error: validate.error.message });
     }
+    console.log(priceDetail.price);
+    if (priceDetail.saleRatio) {
+      priceDetail.priceAfterSale =
+        priceDetail.price * (1 - priceDetail.saleRatio / 100);
+      console.log(priceDetail.priceAfterSale);
+    }
+    console.log(priceDetail);
+
     const newVariant = await variantModel.create({
       productId,
       name,
       image,
-      price,
+      priceDetail,
       color,
       size,
       countInStock,
     });
-
+    if (JSON.stringify(product.priceDetail) === "{}"||Object.values(product.priceDetail).length<=2) {
+      product.priceDetail = newVariant.priceDetail;
+    }
     product.variants.push(newVariant._id);
     product.countInStock += newVariant.countInStock;
     console.log(product.countInStock);
     await product.save();
-    return res
-      .status(201)
-      .json({ variant: newVariant, message: "Tao variant thanh cong" });
+    return res.status(201).json({
+      variant: newVariant,
+      message: "Tao variant thanh cong",
+    });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }

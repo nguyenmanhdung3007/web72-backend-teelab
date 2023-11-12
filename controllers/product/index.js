@@ -12,8 +12,8 @@ const getAllProduct = async (req, res) => {
     const products = await productModel
     .find()
     .populate("category")
-    .populate("variants"); 
-    return res.status(200).json({ products});
+    .populate("variants");
+    return res.status(200).json({ products,});
   } catch (error) {
     console.log(error);
     return res.status(400).json({ error: error.message || "Failed" });
@@ -70,6 +70,7 @@ const getProductById = async (req, res) => {
     const product = await productModel
       .findById(productId)
       .populate("category").populate("variants");
+      console.log((product.priceDetail));
 
     return res.status(200).json({ product });
   } catch (error) {
@@ -122,9 +123,10 @@ const createProduct = async (req, res) => {
       category,
       detailProduct,
     });
+
     return res
       .status(201)
-      .json({ product: newProduct, message: "Tao san pham thanh cong" });
+      .json({ product: newProduct, priceAfterSale: priceAfterSale , message: "Tao san pham thanh cong" });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
