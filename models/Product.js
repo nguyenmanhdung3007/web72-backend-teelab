@@ -7,6 +7,7 @@ const productModel = mongoose.Schema(
     priceDetail: {
       price: { type: Number, required: true },
       saleRatio: { type: Number, required: true },
+      priceAfterSale: {type: Number ,required: true},
     },
     category: {
       type: mongoose.Types.ObjectId,
