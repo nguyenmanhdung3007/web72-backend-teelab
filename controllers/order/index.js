@@ -59,26 +59,39 @@ const getOrderById = async (req, res) => {
   }
 };
 
-const updateOrder = async (req, res) => {
-  // Check xem status nếu = "0" thì mới cho update
-
-  // chỉ cho thay đổi địa chỉ giao hàng
-};
-
 const updateStatusOrder = async (req, res) => {
   try {
-    const status = req.body;
+    const { status } = req.body;
     const orderId = req.params.id;
-    const order = orderModel.findByIdAndUpdate(orderId, status, { new: true });
+    console.log(1);
+    const order = await orderModel.findByIdAndUpdate(orderId, status, {
+      new: true,
+    });
     return res.status(200).json({ message: "update status thành công", order });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
 
-
 const deleteOrder = async (req, res) => {
   // check status nếu bằng = mới cho delete và kiểm tra hoàn tiền
-}
+};
 
-module.exports = { createOrder, updateStatusOrder, getOrderById };
+const getPagingOrder = async (req, res) => {
+  try {
+    const pageSize = req.query.pageSize || 5;
+    const pageIndex = req.query.pageIndex || 1;
+
+    const order = await orderModel
+      .find()
+      .populate({ path: "orderedBy", select: "-password" })
+      .skip(pageSize * pageIndex - pageSize)
+      .limit(pageSize);
+    const count = orderModel.countDocuments();
+    const totalPage = Math.ceil(count / pageSize);
+    return res.status(200).json({ order, count, totalPage });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+module.exports = { createOrder, updateStatusOrder, getOrderById, getPagingOrder };

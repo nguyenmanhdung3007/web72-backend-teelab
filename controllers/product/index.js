@@ -288,7 +288,8 @@ const getPagingProduct = async (req, res) => {
 
     const product = await productModel
       .find()
-      .populate({ path: "variants" }, { path: "category" })
+      .populate("variants")
+      .populate("category")
       .skip(pageSize * pageIndex - pageSize)
       .limit(pageSize);
     const count = await productModel.countDocuments();
