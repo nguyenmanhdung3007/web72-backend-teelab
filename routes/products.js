@@ -2,23 +2,23 @@ const router = require("express").Router();
 const {
   createProduct,
   createCategory,
-  createVariant,
   getProductById,
-  getProduct,
+  getAllProductPaging,
   deleteProduct,
-  getPagingProduct,
   getProductByCategory,
+  updateProduct,
 } = require("../controllers/product");
 
 // GET
-// router.get("/", getProduct);
-// router.get("/get-by-category", getProductByCategory);
-router.get("/get-paging", getPagingProduct);
+router.get("/get-all-paging", getAllProductPaging);
+router.get("/get-by-category", getProductByCategory);
 router.get("/:id", getProductById);
 // POST
 router.post("/create-category", createCategory);
 router.post("/:id", createProduct);
-router.post("/create-variant/:id", createVariant);
+// router.post("/create-variant/:id", createVariant);
+
+router.put("/:id", updateProduct)
 
 // DELETE
 //router update
