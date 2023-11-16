@@ -1,10 +1,16 @@
 // const OrderModel = require('../../models/Order')
 const orderModel = require('../../models/Order.js');
 const variantModel = require('../../models/Variant.js');
+const userModel = require('../../models/User.js');
 
 const getAllOrder = async (req, res) => { //tất cả order
     try {
+        const pageSize = req.query.pageSize || 5;
+        const pageIndex = req.query.pageIndex || 1;
+        console.log(pageSize, pageIndex);
         const result = await orderModel.find({})
+            .populate({path: "orderedBy", select: ["-refreshToken", "-password", "-__v", "-updatedAt"] })
+            .skip(pageSize * pageIndex - pageSize).limit(pageSize)
         return res.status(200).json({
             order: result,
             countOrder: result.length
@@ -230,11 +236,115 @@ const getOrderYear = async (req, res) => {
     }
 }
 
+// user 
+
+const getNewUserDay = async (req, res) => {
+    try {
+        const date = new Date();
+
+        let ArrUserNew = [];
+
+        let day = req.query?.day;
+        if (!day) {
+            day = date.getDate();
+        } 
+        // console.log(day)
+
+        const users = await userModel.find({});
+        for (const user of users) {
+
+            if(user.createdAt?.getDate() == day) {
+                ArrUserNew.push(user);
+                console.log(user)
+
+            }
+        }
+        return res.status(200).json({
+            day: day,
+            usersNewDay: ArrUserNew,
+            countUserNewDay: ArrUserNew.length
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+}
+
+const getNewUserMonth = async (req, res) => {
+    try {
+        const date = new Date();
+
+        let ArrUserNew = [];
+
+        let month = req.query?.month;
+        if (!month) {
+            month = (date.getMonth()+1);
+        } 
+        // console.log(month)
+
+        const users = await userModel.find({});
+        for (const user of users) {
+
+            if((user.createdAt?.getMonth()+1) == month) {
+                ArrUserNew.push(user);
+                // console.log(user)
+
+            }
+        }
+        return res.status(200).json({
+            month: month,
+            newUsersDay: ArrUserNew,
+            countNewUsersDay: ArrUserNew.length,
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+}
+
+const getNewUserYear = async (req, res) => {
+    try {
+        const date = new Date();
+
+        let ArrUserNew = [];
+
+        let year = req.query?.year;
+        if (!year) {
+            year = date.getFullYear();
+        } 
+        console.log(year);
+
+        const users = await userModel.find({});
+        for (const user of users) {
+
+            if(user.createdAt?.getFullYear() == year) {
+                ArrUserNew.push(user);
+                // console.log(user)
+
+            }
+        }
+        return res.status(200).json({
+            year:year,
+            newUsersDay: ArrUserNew,
+            countNewUsersDay: ArrUserNew.length
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+}
+
 
 module.exports = {
     getAllOrder,
     getOrdersToday,
     getOrderDate,
     getOrderMonth,
-    getOrderYear
+    getOrderYear,
+    getNewUserDay,
+    getNewUserMonth,
+    getNewUserYear
 }
