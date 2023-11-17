@@ -5,33 +5,41 @@ const categoryModel = require("../../models/Category.js");
 const { productSchema, variantSchema } = require("./validation.js");
 const orderModel = require("../../models/Order.js");
 
-
-
 const getAllProduct = async (req, res) => {
   try {
     const products = await productModel
-    .find()
-    .populate("category")
-    .populate("variants");
-    return res.status(200).json({ products,});
+      .find()
+      .populate("category")
+      .populate("variants");
+    return res.status(200).json({ products });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
+const getAllCategory = async (req, res) => {
+  try {
+    const categories = await categoryModel.find();
+    return res.status(200).json({ categories });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+
 const getAllProductPaging = async (req, res) => {
   try {
     const pageSize = req.query.pageSize || 10;
     const pageIndex = req.query.pageIndex || 1;
     const products = await productModel
-    .find()
-    .populate("category")
-    .populate("variants")
-    .skip(pageSize * pageIndex - pageSize)
-    .limit(pageSize);
+      .find()
+      .populate("category")
+      .populate("variants")
+      .skip(pageSize * pageIndex - pageSize)
+      .limit(pageSize);
     const count = await productModel.countDocuments();
     const totalPage = Math.ceil(count / pageSize);
-    
+
     return res.status(200).json({ products, count, totalPage });
   } catch (error) {
     console.log(error);
@@ -69,8 +77,9 @@ const getProductById = async (req, res) => {
     }
     const product = await productModel
       .findById(productId)
-      .populate("category").populate("variants");
-      console.log((product.priceDetail));
+      .populate("category")
+      .populate("variants");
+    console.log(product.priceDetail);
 
     return res.status(200).json({ product });
   } catch (error) {
@@ -126,7 +135,11 @@ const createProduct = async (req, res) => {
 
     return res
       .status(201)
-      .json({ product: newProduct, priceAfterSale: priceAfterSale , message: "Tao san pham thanh cong" });
+      .json({
+        product: newProduct,
+        priceAfterSale: priceAfterSale,
+        message: "Tao san pham thanh cong",
+      });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
@@ -204,9 +217,9 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getAllProduct,
+  getAllCategory,
   getAllProductPaging,
   getProductById,
   createProduct,

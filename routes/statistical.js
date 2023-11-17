@@ -22,10 +22,10 @@ statisticalRouter.get("/order-month", getOrderMonth);
 statisticalRouter.get("/order-year", getOrderYear);
 
 // user
-statisticalRouter.get("/order", getPagingOrder);
+statisticalRouter.get("/order",authentication,authorization, getPagingOrder);
 
 // product
-statisticalRouter.get("/product/get-by-category", getProductByCategory);
+statisticalRouter.get("/product/get-by-category",authentication,authorization, getProductByCategory);
 
 // variant
 
