@@ -18,3 +18,4 @@ const variantModel = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("variants", variantModel);
+  

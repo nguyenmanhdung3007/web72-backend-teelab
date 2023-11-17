@@ -9,6 +9,8 @@ const {
   updateProduct,
   getAllProduct,
 } = require("../controllers/product");
+const { authentication } = require("../middlewares/authenticator");
+const { authorization } = require("../middlewares/authorization");
 
 // GET
 
@@ -17,16 +19,15 @@ router.get("/get-all-paging", getAllProductPaging);
 router.get("/get-by-category", getProductByCategory);
 router.get("/:id", getProductById);
 // POST
-router.post("/create-category", createCategory);
-router.post("/:id", createProduct);
+router.post("/create-category",authentication,authorization, createCategory);
+router.post("/:id", authentication, authorization, createProduct);
 // router.post("/create-variant/:id", createVariant);
 
 // PUT
-router.put("/:id", updateProduct)
-
+router.put("/:id",authentication,authorization, updateProduct);
 
 // DELETE
 //router update
-router.delete("/:id", deleteProduct);
+router.delete("/:id",authentication,authorization, deleteProduct);
 
 module.exports = router;
