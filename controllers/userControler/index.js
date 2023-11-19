@@ -10,7 +10,7 @@ const login = async (req, res) => {
         const { password, email } = req.body;
 
         const emailExist = await Users.findOne({ email })
-
+        const userName = emailExist?.userName;
         if (!emailExist) {
             return res.status(400).json("Người dùng không tồn tại");
         }
@@ -28,7 +28,8 @@ const login = async (req, res) => {
         await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
         
         return res.status(201).json({
-            // email: email,
+            email: email,
+            userName: userName,
             accessToken: accessToken,
             refreshToken: refreshToken
         })

@@ -9,7 +9,7 @@ const getAllOrder = async (req, res) => { //tất cả order
         const pageIndex = req.query.pageIndex || 1;
         console.log(pageSize, pageIndex);
         const result = await orderModel.find({})
-            .populate({path: "orderedBy", select: ["-refreshToken", "-password", "-__v", "-updatedAt"] })
+            .populate({ path: "orderedBy", select: ["-refreshToken", "-password", "-__v", "-updatedAt"] })
             .skip(pageSize * pageIndex - pageSize).limit(pageSize)
         return res.status(200).json({
             order: result,
@@ -34,28 +34,28 @@ const getOrdersToday = async (req, res) => {
             }
         }
 
-         // ==============================
-         const variantsValue = await variantModel.find({})
-         // console.log(variantsValue)
-         let sumTotal = 0;
- 
- 
-         for (const value of orderToday) {
-             const ListOrder = value.orderDetail
-             const status = value?.status
- 
-             for (const variantItem of ListOrder) {
- 
-                 for (const value of variantsValue) {
-                     //    console.log(value.id)
-                     if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
-                         sumTotal += value.price * variantItem.quantity
-                     }
-                 }
- 
-             }
-         }
-         //==========================================
+        // ==============================
+        const variantsValue = await variantModel.find({})
+        // console.log(variantsValue)
+        let sumTotal = 0;
+
+
+        for (const value of orderToday) {
+            const ListOrder = value.orderDetail
+            const status = value?.status
+
+            for (const variantItem of ListOrder) {
+
+                for (const value of variantsValue) {
+                    //    console.log(value.id)
+                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+                        sumTotal += value.price * variantItem.quantity
+                    }
+                }
+
+            }
+        }
+        //==========================================
 
         return res.status(201).json({
             orderToday: orderToday,
@@ -128,14 +128,18 @@ const getOrderMonth = async (req, res) => {
     try {
         const param = req.query
         let month = param.month;
+        const pageSize = req.query.pageSize || 50;
+        const pageIndex = req.query.pageIndex || 1;
 
         const date = new Date()
         if (!month) {
             month = date.getMonth() + 1;
         }
         const allOrder = await orderModel.find({})
-        const orderMonth = [];
+            .skip(pageSize * pageIndex - pageSize)
+            .limit(pageSize)
 
+        const orderMonth = [];
 
         for (const key in allOrder) {
             if (allOrder[key]?.createdAt.getMonth() + 1 == month) {
@@ -183,6 +187,9 @@ const getOrderMonth = async (req, res) => {
 const getOrderYear = async (req, res) => {
     try {
         const param = req.query
+        const pageSize = req.query.pageSize || 50;
+        const pageIndex = req.query.pageIndex || 1;
+
         let year = param.year;
         const date = new Date()
 
@@ -201,6 +208,8 @@ const getOrderYear = async (req, res) => {
 
         //================================
         const variantsValue = await variantModel.find({})
+            .skip(pageSize * pageIndex - pageSize)
+            .limit(pageSize)
         // console.log(variantsValue)
         let sumTotal = 0;
 
@@ -245,18 +254,19 @@ const getNewUserDay = async (req, res) => {
         let ArrUserNew = [];
 
         let day = req.query?.day;
+        let month = req.query?.month;
         if (!day) {
             day = date.getDate();
-        } 
-        // console.log(day)
+        }
+        if (!month) {
+            month = date.getMonth() + 1;
+        }
 
         const users = await userModel.find({});
         for (const user of users) {
 
-            if(user.createdAt?.getDate() == day) {
+            if (user.createdAt?.getDate() == day && ((user.createdAt?.getMonth()) + 1) == month) {
                 ArrUserNew.push(user);
-                console.log(user)
-
             }
         }
         return res.status(200).json({
@@ -273,22 +283,25 @@ const getNewUserDay = async (req, res) => {
 
 const getNewUserMonth = async (req, res) => {
     try {
+        const pageSize = req.query.pageSize || 30;
+        const pageIndex = req.query.pageIndex || 1;
         const date = new Date();
 
         let ArrUserNew = [];
 
         let month = req.query?.month;
         if (!month) {
-            month = (date.getMonth()+1);
-        } 
-        // console.log(month)
+            month = (date.getMonth() + 1);
+        }
+        console.log(pageSize, pageIndex)
 
-        const users = await userModel.find({});
+        const users = await userModel.find({})
+            .skip(pageSize * pageIndex - pageSize).limit(pageSize)
+
         for (const user of users) {
-
-            if((user.createdAt?.getMonth()+1) == month) {
+            if ((user.createdAt?.getMonth() + 1) == month) {
                 ArrUserNew.push(user);
-                // console.log(user)
+                console.log(user)
 
             }
         }
@@ -307,26 +320,28 @@ const getNewUserMonth = async (req, res) => {
 const getNewUserYear = async (req, res) => {
     try {
         const date = new Date();
-
+        const pageSize = req.query.pageSize || 30;
+        const pageIndex = req.query.pageIndex || 1;
         let ArrUserNew = [];
 
         let year = req.query?.year;
         if (!year) {
             year = date.getFullYear();
-        } 
+        }
         console.log(year);
 
-        const users = await userModel.find({});
+        const users = await userModel.find({})
+            .skip(pageSize * pageIndex - pageSize).limit(pageSize);
         for (const user of users) {
 
-            if(user.createdAt?.getFullYear() == year) {
+            if (user.createdAt?.getFullYear() == year) {
                 ArrUserNew.push(user);
                 // console.log(user)
 
             }
         }
         return res.status(200).json({
-            year:year,
+            year: year,
             newUsersDay: ArrUserNew,
             countNewUsersDay: ArrUserNew.length
         })
