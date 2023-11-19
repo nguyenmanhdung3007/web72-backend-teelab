@@ -140,41 +140,49 @@ const getOrderMonth = async (req, res) => {
             .limit(pageSize)
 
         const orderMonth = [];
+        let sumTotal = 0;
+
 
         for (const key in allOrder) {
             if (allOrder[key]?.createdAt.getMonth() + 1 == month) {
                 orderMonth.push(allOrder[key]);
             }
+
         }
 
-        //==================================
-        const variantsValue = await variantModel.find({})
+        for (const order of orderMonth) {
+            console.log(order.shippingAddress)
+
+        }
+
+        // //==================================
+        // const variantsValue = await variantModel.find({})
         // console.log(variantsValue)
-        let sumTotal = 0;
+        // console.log(orderMonth)
 
 
-        for (const value of orderMonth) {
-            const ListOrder = value.orderDetail
-            const status = value?.status
+        // for (const value of orderMonth) {
+        //     const ListOrder = value.orderDetail
+        //     const status = value?.status
 
-            for (const variantItem of ListOrder) {
+        //     for (const variantItem of ListOrder) {
 
-                for (const value of variantsValue) {
-                    //    console.log(value.id)
-                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
-                        sumTotal += value.price * variantItem.quantity;
-                    }
-                }
+        //         for (const value of variantsValue) {
+        //             //    console.log(value.id)
+        //             if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+        //                 sumTotal += value.price * variantItem.quantity;
+        //             }
+        //         }
 
-            }
-        }
+        //     }
+        // }
         //====================
 
         return res.status(201).json({
             orderMonth: orderMonth,
             status: 'success',
             month: month,
-            countOrderMonth: orderMonth.length,
+            // countOrderMonth: orderMonth.length,
             sumTotal: sumTotal
         })
     } catch (error) {
