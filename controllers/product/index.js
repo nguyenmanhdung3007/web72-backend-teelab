@@ -107,7 +107,7 @@ const createProduct = async (req, res) => {
   const category = await categoryModel.findById(categoryId);
 
   if (!category) {
-    return res.status(404).json({ message: "product chưa tồn tại" });
+    return res.status(404).json({ message: "category chưa tồn tại" });
   }
   try {
     const { name, slug, priceDetail, countInStock, thumbnail, detailProduct } =
@@ -137,7 +137,6 @@ const createProduct = async (req, res) => {
       .status(201)
       .json({
         product: newProduct,
-        priceAfterSale: priceAfterSale,
         message: "Tao san pham thanh cong",
       });
   } catch (error) {
@@ -151,7 +150,6 @@ const updateProduct = async (req, res) => {
     const {
       name,
       slug,
-      priceDetail,
       category,
       countInStock,
       thumbnail,
@@ -159,7 +157,7 @@ const updateProduct = async (req, res) => {
       variant,
     } = req.body;
 
-    const product = productModel.findByIdAndUpdate();
+    const product = productModel.findByIdAndUpdate(productId, {name, slug, });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }

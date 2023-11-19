@@ -31,5 +31,6 @@ statisticalRouter.get("/product/get-by-category",authentication,authorization, g
 
 
 // order
+// statisticalRouter.get("/order/all",authentication,authorization, getAllOrder);
 
 module.exports = statisticalRouter;
