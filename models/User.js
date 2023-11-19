@@ -44,7 +44,7 @@ const User = mongoose.Schema(
           quantity: { type: Number, default: 1 },
         },
       ],
-      totalPrice: { type: Number, default: 0 },
+      totalPrice: { type: Number, },
     },
   },
   { timestamps: true }

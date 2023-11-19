@@ -244,28 +244,27 @@ const getUserById = async (req, res) => {
 
 
 // Hàm tính tổng tiền từ danh sách sản phẩm trong giỏ hàng
-function calculateTotalPrice(cartDetail) {
+async function calculateTotalPrice(cartDetail) {
   let totalPrice = 0;
 
-  cartDetail.forEach(async (item) => {
+  for (const item of cartDetail) {
     // Lấy giá từ variantModel
-    // Lưu ý: Đây chỉ là một ví dụ, bạn cần thay đổi logic này phù hợp với cấu trúc thực tế của ứng dụng
     const variant = await variantModel.findById(item.variant).select("priceDetail");
 
     if (!variant.priceDetail.saleRatio) {
       const price = variant.priceDetail.price * item.quantity;
-      console.log(1);
-      console.log(price);
-      totalPrice += Math.round(price);
+      if (!isNaN(price)) {
+        totalPrice += Math.round(price);
+      }
     } else {
       const price = variant.priceDetail.priceAfterSale * item.quantity;
-      console.log(2);
-      console.log(price);
-      totalPrice += Math.round(price / 1000) * 1000;
+      if (!isNaN(price)) {
+        totalPrice += Math.round(price / 1000) * 1000;
+      }
     }
-    console.log(totalPrice);
-  });
-  return totalPrice;
+  }
+
+  return isNaN(totalPrice) ? 0 : totalPrice;
 }
 
 const updateCart = async (req, res) => {
@@ -290,17 +289,15 @@ const updateCart = async (req, res) => {
         { $set: { "cart.cartDetail.$.quantity": quantity } },
         { new: true }
       );
-      const totalPrice = calculateTotalPrice(response.cart.cartDetail);
-      console.log(totalPrice);
+      
+      const totalPrice = await calculateTotalPrice(response.cart.cartDetail);
       response.cart.totalPrice = totalPrice;
-      console.log(1);
-      console.log(response.cart.totalPrice)
       await response.save();
-      console.log(response);
 
       return res.status(200).json({
         success: response ? true : false,
         mes: response ? response : "something went wrong ",
+        totalPrice: totalPrice,
       });
     } else {
       console.log(variant);
@@ -314,9 +311,8 @@ const updateCart = async (req, res) => {
         { new: true }
       );
 
-      const totalPrice = calculateTotalPrice(response.cart.cartDetail);
+     const totalPrice = await calculateTotalPrice(response.cart.cartDetail);
       response.cart.totalPrice = totalPrice;
-      console.log(response.cart.totalPrice);
       await response.save();
       
 
@@ -347,7 +343,7 @@ const removeVariantInCart = async (req, res) => {
     if (!alreadyVariant) {
       return res.status(200).json({
         success: true,
-        mes: "Variant not found in your cart",
+        mes: "Không có variant trong cart",
       });
     }
 
@@ -358,7 +354,7 @@ const removeVariantInCart = async (req, res) => {
     );
 
     // Tính tổng tiền
-    const totalPrice = calculateTotalPrice(response.cart.cartDetail);
+    const totalPrice = await calculateTotalPrice(response.cart.cartDetail);
     response.cart.totalPrice = totalPrice;
     await response.save();
 

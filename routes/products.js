@@ -19,7 +19,7 @@ router.get("/get-all-paging", getAllProductPaging);
 router.get("/get-by-category", getProductByCategory);
 router.get("/:id", getProductById);
 // POST
-router.post("/create-category",authentication,authorization, createCategory);
+// router.post("/create-category",authentication,authorization, createCategory);
 router.post("/:id", authentication, authorization, createProduct);
 // router.post("/create-variant/:id", createVariant);
 

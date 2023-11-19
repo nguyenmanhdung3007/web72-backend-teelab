@@ -6,15 +6,16 @@ const userModel = require("../../models/User.js");
 
 const createOrder = async (req, res) => {
   const input = req.body;
-  const userId = req.user._id;
+  const userId = req.user;
   const userCart = await userModel
     .findById(userId)
     .select("cart")
-    .populate("cart.variant");
+    .populate("cart.cartDetail.variant");
 
-  //   userCart.cart = [];
-  //   await userCart.save();
+  // userCart.cart = [];
+  // await userCart.save();
 
+  //   console.log(userCart);
   // return res.json({
   //   success: userCart ? true : false,
   //   rs: userCart ? userCart : "something went wrong",
@@ -28,35 +29,26 @@ const createOrder = async (req, res) => {
   }
 
   try {
-    if (userCart.cart.length === 0) {
+    if (userCart.cart.cartDetail.length === 0) {
       return res.status(200).json({
         status: "ERR",
         message: "Không có sản phẩm trong giỏ hàng",
       });
     }
-    let totalPrice = 0;
     for (let i = 0; i < userCart?.cart.length; i++) {
-      const variantId = userCart.cart[i].variant;
+      const variantId = userCart.cart.cartDetail[i].variant;
       const variant = await variantModel.findById(variantId);
 
-      console.log(userCart.cart[i].variant.countInStock);
-      console.log(userCart.cart[i].quantity);
-
-      if (userCart.cart[i].variant?.countInStock >= userCart.cart[i].quantity) {
+      if (
+        userCart.cart.cartDetail[i].variant?.countInStock >=
+        userCart.cart.cartDetail[i].quantity
+      ) {
         console.log(variant.countInStock);
-        variant.countInStock -= userCart.cart[i].quantity;
+        variant.countInStock -= userCart.cart.cartDetail[i].quantity;
         const product = await productModel.findById(variant.productId);
-        product.countInStock -= userCart.cart[i].quantity;
+        product.countInStock -= userCart.cart.cartDetail[i].quantity;
         // Tính giá của order
-        if (!variant.priceDetail.saleRatio) {
-          const price = variant.priceDetail.price * userCart.cart[i].quantity;
-          Math.round((totalPrice += price));
-          console.log(price);
-        } else {
-          const price =
-            variant.priceDetail.priceAfterSale * userCart.cart[i].quantity;
-          Math.round((totalPrice += price) / 1000) * 1000;
-        }
+
         await variant.save();
         await product.save();
       } else {
@@ -72,10 +64,10 @@ const createOrder = async (req, res) => {
       orderDetail: userCart.cart,
       paymentMethod: input.paymentMethod,
       status: input.status,
-      totalPrice: totalPrice,
+      totalPrice: userCart?.cart.totalPrice,
     });
 
-    userCart.cart = [];
+    userCart.cart = {};
     await userCart.save();
     console.log(userCart);
 
@@ -131,24 +123,35 @@ const getPagingOrder = async (req, res) => {
     const pageSize = req.query.pageSize || 5;
     const pageIndex = req.query.pageIndex || 1;
 
-    const order = await orderModel
-      .find()
+    const orders = await orderModel
+      .find({})
       .populate({ path: "orderedBy", select: "-password" })
+      .populate("orderDetail.variant")
       .skip(pageSize * pageIndex - pageSize)
       .limit(pageSize);
     const count = orderModel.countDocuments();
     const totalPage = Math.ceil(count / pageSize);
-    return res.status(200).json({ order, count, totalPage });
+
+    return res.status(200).json({ orders, count, totalPage });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
 
+const getOrder = async (req, res) => {
+  try {
+    const orders = await orderModel
+      .find({})
+      .populate({ path: "orderedBy", select: "-password" })
+      .populate("orderDetail.variant");
 
+    const count = orderModel.countDocuments();
 
-
-
-
+    return res.status(200).json({ orders, count });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
 
 // paypal
 const generateAccessToken = async (next) => {
@@ -157,7 +160,7 @@ const generateAccessToken = async (next) => {
       throw new Error("MISSING_API_CREDENTIALS");
     }
     const auth = Buffer.from(
-      process.env.PAYPAL_CLIENT_ID + ":" + process.env.PAYPAL_CLIENT_SECRET,
+      process.env.PAYPAL_CLIENT_ID + ":" + process.env.PAYPAL_CLIENT_SECRET
     ).toString("base64");
     const response = await fetch(`${base}/v1/oauth2/token`, {
       method: "POST",
@@ -169,7 +172,7 @@ const generateAccessToken = async (next) => {
 
     const data = await response.json();
     return data.access_token;
-    next()
+    next();
   } catch (error) {
     console.error("Failed to generate Access Token:", error);
   }
@@ -253,15 +256,19 @@ async function handleResponse(response) {
 const createOrderPaymentPaypal = async (req, res) => {
   try {
     // use the cart information passed from the front-end to calculate the order amount detals
-    const {_id} = req.user
+    const { _id } = req.user;
     const { orderDetail, totalPrice, shippingAddress } = req.body;
     // const { jsonResponse, httpStatusCode } = await createOrderPayPal(cart);
-    const rs = await orderModel.create({orderDetail, totalPrice, orderBy: _id})
+    const rs = await orderModel.create({
+      orderDetail,
+      totalPrice,
+      orderBy: _id,
+    });
     // res.status(httpStatusCode).json(jsonResponse);
     return res.json({
-        success: userCart ? true : false,
-        rs: userCart ? userCart : "something went wrong",
-      });
+      success: userCart ? true : false,
+      rs: userCart ? userCart : "something went wrong",
+    });
   } catch (error) {
     console.error("Failed to create order:", error);
     res.status(500).json({ error: "Failed to create order." });
@@ -279,11 +286,25 @@ const createCaptureOrder = async (req, res) => {
   }
 };
 
+const getAllOrder = async (req, res) => {
+  try {
+    const orders = await orderModel
+      .find()
+      .populate({ path: "orderedBy", select: "-password" })
+      .populate("variants");
+    return res.status(200).json({ orders });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error.message || "Failed" });
+  }
+};
+
 module.exports = {
+  getAllOrder,
   createOrder,
   updateStatusOrder,
   getOrderById,
   getPagingOrder,
   createOrderPaymentPaypal,
-  createCaptureOrder
+  createCaptureOrder,
 };
