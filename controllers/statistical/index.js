@@ -151,8 +151,8 @@ const getOrderMonth = async (req, res) => {
         }
 
         for (const order of orderMonth) {
-            console.log(order.shippingAddress)
-
+            // console.log(order.totalPrice)
+            sumTotal+=order.totalPrice
         }
 
         // //==================================
@@ -182,7 +182,7 @@ const getOrderMonth = async (req, res) => {
             orderMonth: orderMonth,
             status: 'success',
             month: month,
-            // countOrderMonth: orderMonth.length,
+            countOrderMonth: orderMonth.length,
             sumTotal: sumTotal
         })
     } catch (error) {

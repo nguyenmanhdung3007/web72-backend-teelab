@@ -5,7 +5,7 @@ const orderSchema = Joi.object({
     Joi.object({
       variant: Joi.string(),
       quantity: Joi.number().positive().integer().required(),
-    }).required()
+    })
   ),
   shippingAddress: Joi.object({
     address: Joi.string(),

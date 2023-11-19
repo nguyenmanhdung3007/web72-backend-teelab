@@ -3,10 +3,11 @@ const Joi = require("joi");
 const productSchema = Joi.object({
   name: Joi.string().required(),
   priceDetail: Joi.object({
-    price: Joi.number().required(),
-    saleRatio: Joi.number().required(),
+    price: Joi.number(),
+    saleRatio: Joi.number(),
+    priceAfterSale: Joi.number(),
   }),
-  countInStock: Joi.number().required(),
+  countInStock: Joi.number(),
   detailProduct: Joi.object({
     material: Joi.string(),
     form: Joi.string(),
@@ -16,12 +17,5 @@ const productSchema = Joi.object({
   }).required(),
 });
 
-const variantSchema = Joi.object({
-  name: Joi.string().required(),
-  price: Joi.number().required(),
-  color: Joi.string().required(),
-  size: Joi.string().required(),
-  countInStock: Joi.number().positive().integer().required(),
-});
 
-module.exports = { productSchema, variantSchema };
+module.exports = { productSchema };

@@ -11,6 +11,9 @@ const fileUpload = require('express-fileupload');
 const morgan = require('morgan');
 const cors = require('cors');
 
+const base = "https://api-m.sandbox.paypal.com";
+
+
 
 var indexRouter = require('./routes/index');
 
@@ -18,6 +21,8 @@ var app = express();
 app.use(express.json())
 app.use(fileUpload());
 connectDb();
+
+app.use(express.static("client"));
 
 app.use(morgan("combined"))
 app.use(cors({ origin: "*"}))

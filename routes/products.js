@@ -2,23 +2,32 @@ const router = require("express").Router();
 const {
   createProduct,
   createCategory,
-  createVariant,
   getProductById,
-  getProduct,
+  getAllProductPaging,
   deleteProduct,
-  getPagingProduct,
+  getProductByCategory,
+  updateProduct,
+  getAllProduct,
 } = require("../controllers/product");
+const { authentication } = require("../middlewares/authenticator");
+const { authorization } = require("../middlewares/authorization");
 
-router.get("/", getProduct);
+// GET
+
+router.get("/", getAllProduct);
+router.get("/get-all-paging", getAllProductPaging);
+router.get("/get-by-category", getProductByCategory);
 router.get("/:id", getProductById);
-router.get('/get-paging', getPagingProduct)
+// POST
+// router.post("/create-category",authentication,authorization, createCategory);
+router.post("/:id", authentication, authorization, createProduct);
+// router.post("/create-variant/:id", createVariant);
 
-router.post("/create-category", createCategory);
-router.post("/:id", createProduct);
-router.post("/create-variant/:id", createVariant);
+// PUT
+router.put("/:id",authentication,authorization, updateProduct);
 
-
-router.delete("/:id", deleteProduct);
-
+// DELETE
+//router update
+router.delete("/:id",authentication,authorization, deleteProduct);
 
 module.exports = router;
