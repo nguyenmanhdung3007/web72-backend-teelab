@@ -4,7 +4,7 @@ const orderModel = mongoose.Schema(
   {
     orderedBy: {
       type: mongoose.Types.ObjectId,
-      ref: "Users",
+      ref: "users",
       required: true,
     },
 

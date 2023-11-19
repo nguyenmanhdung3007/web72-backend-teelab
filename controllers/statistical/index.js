@@ -74,39 +74,59 @@ const getOrdersToday = async (req, res) => {
 
 const getOrderDate = async (req, res) => {
     try {
+        const pageSize = req.query.pageSize || 50;
+        const pageIndex = req.query.pageIndex || 1;
+
         const param = req.query
-        const date = param.day;
+        const date = new Date;
+        let day = param?.day;
+        let month = param?.month;
+
+        if (!date) {
+            date = date.getDate();
+        }
+        if (!month) {
+            month = date.getMonth() + 1;
+        }
 
         const allOrder = await orderModel.find({})
+            .populate({ path: "orderedBy" })
+            .populate({ path: "orderDetail.variant" })
+            .skip(pageSize * pageIndex - pageSize).limit(pageSize)
         const orderToday = [];
+        let sumTotal = 0;
+
 
         for (const key in allOrder) {
-            if (allOrder[key]?.createdAt.getDate() == date) {
+            if (allOrder[key]?.createdAt.getDate() == day && month == date.getMonth() + 1) {
                 orderToday.push(allOrder[key]);
             }
         }
 
-        // ==============================
-        const variantsValue = await variantModel.find({})
-        // console.log(variantsValue)
-        let sumTotal = 0;
-
-
         for (const value of orderToday) {
-            const ListOrder = value.orderDetail
-            const status = value?.status
-
-            for (const variantItem of ListOrder) {
-
-                for (const value of variantsValue) {
-                    //    console.log(value.id)
-                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
-                        sumTotal += value.price * variantItem.quantity
-                    }
-                }
-
-            }
+            sumTotal += value.totalPrice;
         }
+
+        // ==============================
+        // const variantsValue = await variantModel.find({})
+        // console.log(variantsValue)
+
+
+        // for (const value of orderToday) {
+        //     const ListOrder = value.orderDetail
+        //     const status = value?.status
+
+        //     for (const variantItem of ListOrder) {
+
+        //         for (const value of variantsValue) {
+        //             //    console.log(value.id)
+        //             if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+        //                 sumTotal += value.price * variantItem.quantity
+        //             }
+        //         }
+
+        //     }
+        // }
         //==========================================
 
         return res.status(201).json({
@@ -136,6 +156,8 @@ const getOrderMonth = async (req, res) => {
             month = date.getMonth() + 1;
         }
         const allOrder = await orderModel.find({})
+            .populate({ path: "orderedBy" })
+            .populate({ path: "orderDetail.variant" })
             .skip(pageSize * pageIndex - pageSize)
             .limit(pageSize)
 
@@ -152,7 +174,7 @@ const getOrderMonth = async (req, res) => {
 
         for (const order of orderMonth) {
             // console.log(order.totalPrice)
-            sumTotal+=order.totalPrice
+            sumTotal += order.totalPrice
         }
 
         // //==================================
@@ -205,7 +227,13 @@ const getOrderYear = async (req, res) => {
             year = date.getFullYear();
         }
         const allOrder = await orderModel.find({})
+            .populate({ path: "orderedBy" })
+            .populate({ path: "orderDetail.variant" })
+            .skip(pageSize * pageIndex - pageSize)
+            .limit(pageSize)
         const orderYear = [];
+        let sumTotal = 0;
+
 
 
         for (const key in allOrder) {
@@ -214,29 +242,32 @@ const getOrderYear = async (req, res) => {
             }
         }
 
-        //================================
-        const variantsValue = await variantModel.find({})
-            .skip(pageSize * pageIndex - pageSize)
-            .limit(pageSize)
-        // console.log(variantsValue)
-        let sumTotal = 0;
-
-
         for (const value of orderYear) {
-            const ListOrder = value.orderDetail
-            const status = value?.status
-
-            for (const variantItem of ListOrder) {
-
-                for (const value of variantsValue) {
-                    //    console.log(value.id)
-                    if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
-                        sumTotal += value.price * variantItem.quantity
-                    }
-                }
-
-            }
+            sumTotal += value.totalPrice;
         }
+
+        //================================
+        // const variantsValue = await variantModel.find({})
+        //     .skip(pageSize * pageIndex - pageSize)
+        //     .limit(pageSize)
+        // // console.log(variantsValue)
+
+
+        // for (const value of orderYear) {
+        //     const ListOrder = value.orderDetail
+        //     const status = value?.status
+
+        //     for (const variantItem of ListOrder) {
+
+        //         for (const value of variantsValue) {
+        //             //    console.log(value.id)
+        //             if (variantItem.variant == value.id && variantItem.quantity && status == 0) {
+        //                 sumTotal += value.price * variantItem.quantity
+        //             }
+        //         }
+
+        //     }
+        // }
         //=====================================
 
         return res.status(201).json({
