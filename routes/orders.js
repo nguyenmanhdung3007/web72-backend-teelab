@@ -14,7 +14,7 @@ router.post("/payment",authentication, createOrderPaymentPaypal);
 // router.post("/:id", authentication, authorization, createOrder);
 // thêm router updateOrder (check đk status = 0)
 // thêm router deleteOrder (check đk status = 0)
-router.get("/all",authentication,authorization, getAllOrder);
+// router.get("/all",authentication,authorization, getAllOrder);
 router.get("/:id",authentication,authorization, getOrderById);
 
 
