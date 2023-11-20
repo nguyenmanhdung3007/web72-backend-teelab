@@ -12,7 +12,7 @@ const {
   getNewUserYear,
 } = require("../controllers/statistical");
 
-const { getPagingOrder } = require("../controllers/order/index.js");
+const { getPagingOrder, getAllOrder } = require("../controllers/order/index.js");
 
 const {
   getProductByCategory,
@@ -115,7 +115,7 @@ statisticalRouter.post(
 );
 
 // order
-// statisticalRouter.get("/order/all",authentication,authorization, getAllOrder);
+statisticalRouter.get("/order/all",authentication,authorization, getAllOrder);
 statisticalRouter.get(
   "/product/get-by-category",
   authentication,
