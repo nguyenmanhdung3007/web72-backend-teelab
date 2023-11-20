@@ -3,12 +3,15 @@ const { authentication } = require("../middlewares/authenticator.js");
 const { authorization } = require("../middlewares/authorization.js");
 
 const {
-  getAllOrder,
   getOrdersToday,
   getOrderDate,
   getOrderMonth,
   getOrderYear,
+  getNewUserDay,
+  getNewUserMonth,
+  getNewUserYear,
 } = require("../controllers/statistical");
+
 const { getPagingOrder } = require("../controllers/order/index.js");
 
 const {
@@ -19,14 +22,41 @@ const {
   getAllProductPaging,
   createCategory,
 } = require("../controllers/product/index.js");
+const {
+  updateVariant,
+  deleteVariant,
+  createVariant,
+} = require("../controllers/variant/index.js");
+const { loginAdmin } = require("../controllers/userControler/index.js");
 
 const statisticalRouter = express.Router();
 
-statisticalRouter.get("/", getAllOrder);
-statisticalRouter.get("/order-today", getOrdersToday);
-statisticalRouter.get("/order-day", getOrderDate);
-statisticalRouter.get("/order-month", getOrderMonth);
-statisticalRouter.get("/order-year", getOrderYear);
+statisticalRouter.post("/login", loginAdmin);
+
+statisticalRouter.get(
+  "/order-today",
+  authentication,
+  authorization,
+  getOrdersToday
+);
+statisticalRouter.get(
+  "/order-day",
+  authentication,
+  authorization,
+  getOrderDate
+);
+statisticalRouter.get(
+  "/order-month",
+  authentication,
+  authorization,
+  getOrderMonth
+);
+statisticalRouter.get(
+  "/order-year",
+  authentication,
+  authorization,
+  getOrderYear
+);
 
 // user
 statisticalRouter.get("/order", authentication, authorization, getPagingOrder);
@@ -65,7 +95,54 @@ statisticalRouter.delete(
 );
 // variant
 
+statisticalRouter.put(
+  "/variant/:id",
+  authentication,
+  authorization,
+  updateVariant
+);
+statisticalRouter.delete(
+  "/variant/:id",
+  authentication,
+  authorization,
+  deleteVariant
+);
+statisticalRouter.post(
+  "/variant/create-variant/:id",
+  authentication,
+  authorization,
+  createVariant
+);
+
 // order
 // statisticalRouter.get("/order/all",authentication,authorization, getAllOrder);
+statisticalRouter.get(
+  "/product/get-by-category",
+  authentication,
+  authorization,
+  getProductByCategory
+);
+
+// variant
+
+//user
+statisticalRouter.get(
+  "/user-day",
+  authentication,
+  authorization,
+  getNewUserDay
+);
+statisticalRouter.get(
+  "/user-month",
+  authentication,
+  authorization,
+  getNewUserMonth
+);
+statisticalRouter.get(
+  "/user-year",
+  authentication,
+  authorization,
+  getNewUserYear
+);
 
 module.exports = statisticalRouter;

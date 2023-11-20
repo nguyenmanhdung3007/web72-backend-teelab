@@ -14,33 +14,74 @@ const login = async (req, res) => {
   try {
     const { password, email } = req.body;
 
-    const emailExist = await Users.findOne({ email });
+        const emailExist = await Users.findOne({ email })
+        const userName = emailExist?.userName;
+        if (!emailExist) {
+            return res.status(400).json("Người dùng không tồn tại");
+        }
 
-    if (!emailExist) {
-      return res.status(400).json("Người dùng không tồn tại");
+        const checkPassword = bcrypt.compareSync(password, emailExist.password)
+        if (!checkPassword) {
+            return res.status(400).json("Sai mật khẩu");
+        }
+
+        //create access token,refresh token
+        const accessToken = generateAccessToken(emailExist._id)
+        const refreshToken = generateRefreshToken(emailExist._id)
+
+        console.log(accessToken)
+        await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
+        
+        return res.status(201).json({
+            id: emailExist._id,
+            email: email,
+            userName: userName,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        })
+    } catch (error) {
+        return res.status(400).json({ message: error.message})
     }
-
-    const checkPassword = bcrypt.compareSync(password, emailExist.password);
-    if (!checkPassword) {
-      return res.status(400).json("Sai mật khẩu");
-    }
-
-    //create access token,refresh token
-    const accessToken = generateAccessToken(emailExist._id);
-    const refreshToken = generateRefreshToken(emailExist._id);
-
-    console.log(accessToken);
-    await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
-
-    return res.status(201).json({
-      // email: email,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
   }
-};
+const loginAdmin = async (req, res) => {
+  try {
+    const { password, email } = req.body;
+
+        const emailExist = await Users.findOne({ email })
+        const userName = emailExist?.userName;
+        if (!emailExist) {
+            return res.status(400).json("Người dùng không tồn tại");
+        }
+
+        const checkPassword = bcrypt.compareSync(password, emailExist.password)
+        if (!checkPassword) {
+            return res.status(400).json("Sai mật khẩu");
+        }
+        const role = emailExist?.role
+        console.log(role);
+        if (!(role === "admin")) {
+            return res.status(400).json("Không phải admin không thể truy cập");
+        }
+
+        //create access token,refresh token
+        const accessToken = generateAccessToken(emailExist._id)
+        const refreshToken = generateRefreshToken(emailExist._id)
+
+        console.log(accessToken)
+        await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
+        
+        return res.status(201).json({
+            id: emailExist._id,
+            email: email,
+            userName: userName,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        })
+    } catch (error) {
+        return res.status(400).json({ message: error.message})
+    }
+  }
+
 
 const register = async (req, res) => {
   try {
@@ -122,9 +163,10 @@ const getAllUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
+    // console.log(id);
 
     const body = req.body;
+    // console.log(body)
     const Schema = Joi.object({
       email: Joi.string().email({
         minDomainSegments: 2,
@@ -156,9 +198,12 @@ const updateUser = async (req, res) => {
       console.log(error.message);
       throw new Error("Email hoặc mật khẩu không hợp lệ.");
     }
-    const sath = await bcrypt.genSalt(10);
-    const newPass = await bcrypt.hash(body.password, sath);
-    body.password = newPass;
+   
+    if( body?.password ) {
+      const sath = await bcrypt.genSalt(10);
+      const newPass = await bcrypt.hash(body.password, sath);
+      body.password = newPass;
+    }
 
     const Result = await userModel.findByIdAndUpdate(id, body, { new: true });
 
@@ -167,7 +212,11 @@ const updateUser = async (req, res) => {
       status: "success",
       user: Result,
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message
+    })
+  }
 };
 
 const deleteUser = async (req, res) => {
@@ -381,7 +430,9 @@ const getCurrent = async (req, res) => {
 
 module.exports = {
   login,
+  loginAdmin,
   register,
+  getCurrent,
   getAllUser,
   updateUser,
   deleteUser,

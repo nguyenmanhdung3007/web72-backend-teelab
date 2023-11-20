@@ -64,10 +64,11 @@ const createVariant = async (req, res) => {
       size,
       countInStock,
     });
-    await updatePriceDetailProduct(productId)
-    product.variants.push(newVariant._id);
+    await product.variants.push(newVariant._id);
+    await product.save();
     product.countInStock += newVariant.countInStock;
     console.log(product.countInStock);
+    await updatePriceDetailProduct(productId)
     await product.save();
     return res.status(201).json({
       variant: newVariant,

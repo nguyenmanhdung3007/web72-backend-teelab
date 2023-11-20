@@ -77,13 +77,19 @@ const getProductById = async (req, res) => {
         .status(200)
         .json({ status: "error", message: "Hãy thêm sản productId" });
     }
-    const product = await productModel
+    const product = await productModel.findById(productId)
+    if (!product) {
+    return res
+        .status(200)
+        .json({ status: "error", message: "Sản phẩm không tồn tại" });
+    }
+    const response = await productModel
       .findById(productId)
       .populate("category")
       .populate("variants");
-    console.log(product.priceDetail);
+    
 
-    return res.status(200).json({ product });
+    return res.status(200).json({ response });
   } catch (error) {
     return res.status(500).json({ error: error.message || "Failed" });
   }
