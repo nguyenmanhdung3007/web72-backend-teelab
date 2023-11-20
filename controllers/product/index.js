@@ -77,19 +77,19 @@ const getProductById = async (req, res) => {
         .status(200)
         .json({ status: "error", message: "Hãy thêm sản productId" });
     }
-    const product = await productModel.findById(productId)
-    if (!product) {
+    const productCheck = await productModel.findById(productId)
+    if (!productCheck) {
     return res
         .status(200)
         .json({ status: "error", message: "Sản phẩm không tồn tại" });
     }
-    const response = await productModel
+    const product = await productModel
       .findById(productId)
       .populate("category")
-      .populate("variants");
+      .populate("variants");https://meet.google.com/aqu-itqt-dvr
     
 
-    return res.status(200).json({ response });
+    return res.status(200).json({ product });
   } catch (error) {
     return res.status(500).json({ error: error.message || "Failed" });
   }
