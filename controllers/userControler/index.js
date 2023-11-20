@@ -43,6 +43,44 @@ const login = async (req, res) => {
         return res.status(400).json({ message: error.message})
     }
   }
+const loginAdmin = async (req, res) => {
+  try {
+    const { password, email } = req.body;
+
+        const emailExist = await Users.findOne({ email })
+        const userName = emailExist?.userName;
+        if (!emailExist) {
+            return res.status(400).json("Người dùng không tồn tại");
+        }
+
+        const checkPassword = bcrypt.compareSync(password, emailExist.password)
+        if (!checkPassword) {
+            return res.status(400).json("Sai mật khẩu");
+        }
+        const role = emailExist?.role
+        console.log(role);
+        if (!(role === "admin")) {
+            return res.status(400).json("Không phải admin không thể truy cập");
+        }
+
+        //create access token,refresh token
+        const accessToken = generateAccessToken(emailExist._id)
+        const refreshToken = generateRefreshToken(emailExist._id)
+
+        console.log(accessToken)
+        await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
+        
+        return res.status(201).json({
+            id: emailExist._id,
+            email: email,
+            userName: userName,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        })
+    } catch (error) {
+        return res.status(400).json({ message: error.message})
+    }
+  }
 
 
 const register = async (req, res) => {
@@ -360,7 +398,7 @@ const removeVariantInCart = async (req, res) => {
 
     const response = await userModel.findByIdAndUpdate(
       _id,
-      { $pull: { "cart.cartDetail": { variant: variant } } },
+      { $pull: { "cart.cartDetail": { variant: variant, } } },
       { new: true }
     );
 
@@ -381,9 +419,20 @@ const removeVariantInCart = async (req, res) => {
   }
 };
 
+const getCurrent = async (req, res) => {
+  const { _id } = req.user;
+  const user = await User.findById(_id).select('-password -role');
+  return res.status(200).json({
+    success: user ? true : false,
+    rs: user ? user : 'User not found',
+  });
+};
+
 module.exports = {
   login,
+  loginAdmin,
   register,
+  getCurrent,
   getAllUser,
   updateUser,
   deleteUser,
