@@ -14,33 +14,35 @@ const login = async (req, res) => {
   try {
     const { password, email } = req.body;
 
-    const emailExist = await Users.findOne({ email });
+        const emailExist = await Users.findOne({ email })
+        const userName = emailExist?.userName;
+        if (!emailExist) {
+            return res.status(400).json("Người dùng không tồn tại");
+        }
 
-    if (!emailExist) {
-      return res.status(400).json("Người dùng không tồn tại");
+        const checkPassword = bcrypt.compareSync(password, emailExist.password)
+        if (!checkPassword) {
+            return res.status(400).json("Sai mật khẩu");
+        }
+
+        //create access token,refresh token
+        const accessToken = generateAccessToken(emailExist._id)
+        const refreshToken = generateRefreshToken(emailExist._id)
+
+        console.log(accessToken)
+        await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
+        
+        return res.status(201).json({
+            email: email,
+            userName: userName,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        })
+    } catch (error) {
+        return res.status(400).json({ message: error.message})
     }
-
-    const checkPassword = bcrypt.compareSync(password, emailExist.password);
-    if (!checkPassword) {
-      return res.status(400).json("Sai mật khẩu");
-    }
-
-    //create access token,refresh token
-    const accessToken = generateAccessToken(emailExist._id);
-    const refreshToken = generateRefreshToken(emailExist._id);
-
-    console.log(accessToken);
-    await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
-
-    return res.status(201).json({
-      // email: email,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
   }
-};
+
 
 const register = async (req, res) => {
   try {
