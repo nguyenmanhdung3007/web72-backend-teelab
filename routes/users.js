@@ -13,7 +13,7 @@ userRouter.post("/register-admin",authentication, authorization, register) // ch
 userRouter.post("/register", register) 
 userRouter.put("/cart",authentication, updateCart)
 userRouter.delete("/remove-cart/:id",authentication, removeVariantInCart)
-userRouter.put("/:id",authentication,authorization, updateUser)    
+userRouter.put("/:id",authentication, updateUser)    
 userRouter.delete("/:id",authentication, authorization, deleteUser)    
 userRouter.get("/",authentication,authorization, getAllUser)
 userRouter.get("/refeshToken/:id", refeshToken)  

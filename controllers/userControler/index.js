@@ -33,6 +33,7 @@ const login = async (req, res) => {
         await Users.findByIdAndUpdate(emailExist._id, { refreshToken });
         
         return res.status(201).json({
+            id: emailExist._id,
             email: email,
             userName: userName,
             accessToken: accessToken,
@@ -124,9 +125,10 @@ const getAllUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
+    // console.log(id);
 
     const body = req.body;
+    // console.log(body)
     const Schema = Joi.object({
       email: Joi.string().email({
         minDomainSegments: 2,
@@ -158,9 +160,12 @@ const updateUser = async (req, res) => {
       console.log(error.message);
       throw new Error("Email hoặc mật khẩu không hợp lệ.");
     }
-    const sath = await bcrypt.genSalt(10);
-    const newPass = await bcrypt.hash(body.password, sath);
-    body.password = newPass;
+   
+    if( body?.password ) {
+      const sath = await bcrypt.genSalt(10);
+      const newPass = await bcrypt.hash(body.password, sath);
+      body.password = newPass;
+    }
 
     const Result = await userModel.findByIdAndUpdate(id, body, { new: true });
 
@@ -169,7 +174,11 @@ const updateUser = async (req, res) => {
       status: "success",
       user: Result,
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message
+    })
+  }
 };
 
 const deleteUser = async (req, res) => {
