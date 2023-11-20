@@ -5,6 +5,6 @@ const { authorization } = require("../middlewares/authorization");
 const router = require("express").Router();
 
 router.get('/', getAllCategory)
-router.post("/create-category",authentication,authorization, createCategory);
+// router.post("/create-category",authentication,authorization, createCategory);
 
 module.exports = router;

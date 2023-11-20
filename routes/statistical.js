@@ -11,7 +11,14 @@ const {
 } = require("../controllers/statistical");
 const { getPagingOrder } = require("../controllers/order/index.js");
 
-const { getProductByCategory } = require("../controllers/product/index.js");
+const {
+  getProductByCategory,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getAllProductPaging,
+  createCategory,
+} = require("../controllers/product/index.js");
 
 const statisticalRouter = express.Router();
 
@@ -22,13 +29,41 @@ statisticalRouter.get("/order-month", getOrderMonth);
 statisticalRouter.get("/order-year", getOrderYear);
 
 // user
-statisticalRouter.get("/order",authentication,authorization, getPagingOrder);
+statisticalRouter.get("/order", authentication, authorization, getPagingOrder);
 
 // product
-statisticalRouter.get("/product/get-by-category",authentication,authorization, getProductByCategory);
-
+statisticalRouter.post(
+  "/create-category",
+  authentication,
+  authorization,
+  createCategory
+);
+statisticalRouter.get(
+  "/product/get-by-category",
+  authentication,
+  authorization,
+  getProductByCategory
+);
+statisticalRouter.get("/product/get-all-paging", getAllProductPaging);
+statisticalRouter.post(
+  "/product/:id",
+  authentication,
+  authorization,
+  createProduct
+);
+statisticalRouter.put(
+  "/product/:id",
+  authentication,
+  authorization,
+  updateProduct
+);
+statisticalRouter.delete(
+  "/product/:id",
+  authentication,
+  authorization,
+  deleteProduct
+);
 // variant
-
 
 // order
 // statisticalRouter.get("/order/all",authentication,authorization, getAllOrder);

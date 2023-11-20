@@ -13,21 +13,16 @@ const { authentication } = require("../middlewares/authenticator");
 const { authorization } = require("../middlewares/authorization");
 
 // GET
-
 router.get("/", getAllProduct);
 router.get("/get-all-paging", getAllProductPaging);
 router.get("/get-by-category", getProductByCategory);
 router.get("/:id", getProductById);
 // POST
-// router.post("/create-category",authentication,authorization, createCategory);
-router.post("/:id", authentication, authorization, createProduct);
-// router.post("/create-variant/:id", createVariant);
+// router.post("/:id", authentication, authorization, createProduct);
+// // PUT
+// router.put("/:id",authentication,authorization, updateProduct);
 
-// PUT
-router.put("/:id",authentication,authorization, updateProduct);
-
-// DELETE
-//router update
-router.delete("/:id",authentication,authorization, deleteProduct);
+// // DELETE
+// router.delete("/:id",authentication,authorization, deleteProduct);
 
 module.exports = router;

@@ -4,6 +4,7 @@ const variantModel = require("../../models/Variant.js");
 const categoryModel = require("../../models/Category.js");
 const { variantSchema } = require("./validation.js");
 const orderModel = require("../../models/Order.js");
+const { logOut } = require("../userControler/index.js");
 
 const getVariantById = async (req, res) => {
   try {
@@ -63,12 +64,7 @@ const createVariant = async (req, res) => {
       size,
       countInStock,
     });
-    if (
-      JSON.stringify(product.priceDetail) ===
-      "{}" /*||Object.values(product.priceDetail).length<=2*/
-    ) {
-      product.priceDetail = newVariant.priceDetail;
-    }
+    await updatePriceDetailProduct(productId)
     product.variants.push(newVariant._id);
     product.countInStock += newVariant.countInStock;
     console.log(product.countInStock);
@@ -141,7 +137,7 @@ const updateVariant = async (req, res) => {
             variant: variantId,
           },
         },
-        status: { $in: ["2", "1"] },
+        status: { $in: ["0", "1"] },
       });
       const isVariantInOrder = variantInOrder.length != 0 ? true : false;
       if (isVariantInOrder) {
@@ -161,7 +157,7 @@ const updateVariant = async (req, res) => {
     const updated = await variantModel.findByIdAndUpdate(variantId, req.body, {
       new: true,
     });
-    updatePriceDetailProduct();
+    await updatePriceDetailProduct(updated.productId);
     return res
       .status(200)
       .json({ message: "update sản phẩm thành công", updated });
@@ -182,7 +178,7 @@ const deleteVariant = async (req, res) => {
           variant: variantId,
         },
       },
-      status: { $in: ["2", "1"] },
+      status: { $in: ["0", "1"] },
     });
     const isVariantInOrder = variantInOrder.length != 0 ? true : false;
     if (isVariantInOrder) {
@@ -198,8 +194,10 @@ const deleteVariant = async (req, res) => {
     });
     // trừ sản phẩm trong product
     product.countInStock -= variant.countInStock;
-    product.variants.pull(variantId)
+    await product.variants.pull(variantId)
     await product.save();
+    console.log(product._id);
+    await updatePriceDetailProduct(product._id)
     return res.status(200).json({ message: "Xoa san pham thanh cong" });
   } catch (error) {
     console.log(error);
@@ -210,14 +208,21 @@ const deleteVariant = async (req, res) => {
 const updatePriceDetailProduct = async (productId) => {
   try {
     const product = await productModel.findById(productId);
+    console.log(product);
     const variantId = product.variants[0] ? product.variants[0] : null;
+    console.log(variantId);
     // product.priceDetail =
     if (variantId) {
       const variant = await variantModel.findById(variantId);
       product.priceDetail = variant.priceDetail;
+
+      console.log(product.priceDetail);
+      product.save();
+    }else{
+
+      product.priceDetail = {};
       product.save();
     }
-    product.priceDetail = {};
   } catch (error) {
     console.error(`Error updating variant price: ${error.message}`);
   }

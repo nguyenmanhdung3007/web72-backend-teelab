@@ -349,7 +349,7 @@ const removeVariantInCart = async (req, res) => {
 
     const response = await userModel.findByIdAndUpdate(
       _id,
-      { $pull: { "cart.cartDetail": { variant: variant } } },
+      { $pull: { "cart.cartDetail": { variant: variant, } } },
       { new: true }
     );
 
@@ -368,6 +368,15 @@ const removeVariantInCart = async (req, res) => {
       mes: "Internal server error",
     });
   }
+};
+
+const getCurrent = async (req, res) => {
+  const { _id } = req.user;
+  const user = await User.findById(_id).select('-password -role');
+  return res.status(200).json({
+    success: user ? true : false,
+    rs: user ? user : 'User not found',
+  });
 };
 
 module.exports = {
