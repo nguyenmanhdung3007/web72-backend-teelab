@@ -74,6 +74,7 @@ const loginAdmin = async (req, res) => {
         return res.status(201).json({
             id: emailExist._id,
             email: email,
+            role: emailExist.role,
             userName: userName,
             accessToken: accessToken,
             refreshToken: refreshToken
