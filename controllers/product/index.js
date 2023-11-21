@@ -17,6 +17,7 @@ const getAllProduct = async (req, res) => {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
+
 const getAllCategory = async (req, res) => {
   try {
     const categories = await categoryModel.find();
@@ -67,6 +68,7 @@ const getProductByCategory = async (req, res) => {
     return res.status(400).json({ error: error.message || "Failed" });
   }
 };
+
 const getProductById = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -75,11 +77,17 @@ const getProductById = async (req, res) => {
         .status(200)
         .json({ status: "error", message: "Hãy thêm sản productId" });
     }
+    const productCheck = await productModel.findById(productId)
+    if (!productCheck) {
+    return res
+        .status(200)
+        .json({ status: "error", message: "Sản phẩm không tồn tại" });
+    }
     const product = await productModel
       .findById(productId)
       .populate("category")
-      .populate("variants");
-    console.log(product.priceDetail);
+      .populate("variants");https://meet.google.com/aqu-itqt-dvr
+    
 
     return res.status(200).json({ product });
   } catch (error) {
@@ -133,12 +141,10 @@ const createProduct = async (req, res) => {
       detailProduct,
     });
 
-    return res
-      .status(201)
-      .json({
-        product: newProduct,
-        message: "Tao san pham thanh cong",
-      });
+    return res.status(201).json({
+      product: newProduct,
+      message: "Tao san pham thanh cong",
+    });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
@@ -147,17 +153,25 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   const productId = req.params.id;
   try {
-    const {
-      name,
-      slug,
-      category,
-      countInStock,
-      thumbnail,
-      detailProduct,
-      variant,
-    } = req.body;
+    const { name, slug, category, thumbnail, detailProduct } = req.body;
 
-    const product = productModel.findByIdAndUpdate(productId, {name, slug, });
+    const product = await productModel.findByIdAndUpdate(
+      productId,
+      {
+        name,
+        slug,
+        category,
+        thumbnail,
+        detailProduct,
+      },
+      {
+        new: true,
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "update sản phẩm thành công", product });
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed" });
   }
@@ -184,16 +198,11 @@ const deleteProduct = async (req, res) => {
             variant: element,
           },
         },
-        status: { $in: ["2", "1"] },
+        status: { $in: ["0", "1"] },
       });
 
       const isProductInOrder = productInOrder.length != 0 ? true : false;
       console.log(isProductInOrder);
-      if (productInOrder) {
-        console.log(1);
-      } else {
-        console.log(2);
-      }
       if (isProductInOrder) {
         return res.status(400).json({
           success: false,
@@ -201,13 +210,13 @@ const deleteProduct = async (req, res) => {
         });
       }
       // Nếu không có thì xóa cả các variant bên trong product
-      // const variant = await variantModel.findByIdAndDelete(element);
+      const variant = await variantModel.findByIdAndDelete(element);
       console.log("xóa các variant bên trong product");
     }
 
-    // const productDeleted = await productModel.findByIdAndDelete({
-    //   _id: productId,
-    // });
+    const productDeleted = await productModel.findByIdAndDelete({
+      _id: productId,
+    });
     return res.status(200).json({ message: "Xoa san pham thanh cong" });
   } catch (error) {
     console.log(error);
@@ -215,14 +224,36 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const updatePriceDetailProduct = async (productId) => {
+  try {
+    const product = await productModel.findById(productId);
+    console.log(product);
+    const variantId = product.variants[0] ? product.variants[0] : null;
+    console.log(variantId);
+    // product.priceDetail =
+    if (variantId) {
+      const variant = await variantModel.findById(variantId);
+      product.priceDetail = variant.priceDetail;
+
+      console.log(product.priceDetail);
+      product.save();
+    } else {
+      product.priceDetail = {};
+      product.save();
+    }
+  } catch (error) {
+    console.error(`Error updating product price: ${error.message}`);
+  }
+};
+
 module.exports = {
-  getAllProduct,
   getAllCategory,
+  createCategory,
+  getAllProduct,
   getAllProductPaging,
+  getProductByCategory,
   getProductById,
   createProduct,
-  createCategory,
   updateProduct,
   deleteProduct,
-  getProductByCategory,
 };

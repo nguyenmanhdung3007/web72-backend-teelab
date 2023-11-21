@@ -16,7 +16,7 @@ router.use("/category", categoryRouter);
 router.use("/order", orderRouter)
 router.use("/variant", variantRouter)
 
-router.use("/admin",authentication, authorization, statisticalRouter)
+router.use("/admin", statisticalRouter)
 
 
 module.exports = router;

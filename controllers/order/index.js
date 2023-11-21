@@ -20,7 +20,7 @@ const createOrder = async (req, res) => {
   //   success: userCart ? true : false,
   //   rs: userCart ? userCart : "something went wrong",
   // });
-  console.log(userCart.cart.length === 0);
+  console.log(userCart.cart.cartDetail.length);
 
   const validate = orderSchema.validate(input);
 
@@ -35,7 +35,7 @@ const createOrder = async (req, res) => {
         message: "Không có sản phẩm trong giỏ hàng",
       });
     }
-    for (let i = 0; i < userCart?.cart.length; i++) {
+    for (let i = 0; i < userCart?.cart.cartDetail.length; i++) {
       const variantId = userCart.cart.cartDetail[i].variant;
       const variant = await variantModel.findById(variantId);
 
@@ -45,12 +45,14 @@ const createOrder = async (req, res) => {
       ) {
         console.log(variant.countInStock);
         variant.countInStock -= userCart.cart.cartDetail[i].quantity;
+        console.log("variantCountInStock", variant.countInStock);
         const product = await productModel.findById(variant.productId);
         product.countInStock -= userCart.cart.cartDetail[i].quantity;
+        console.log("product.countInStock", product.countInStock);
         // Tính giá của order
 
         await variant.save();
-        await product.save();
+        await product.save(); 
       } else {
         return res
           .status(400)
@@ -61,7 +63,7 @@ const createOrder = async (req, res) => {
     const newOrder = await orderModel.create({
       orderedBy: userId,
       shippingAddress: input.shippingAddress,
-      orderDetail: userCart.cart,
+      orderDetail: userCart.cart.cartDetail,
       paymentMethod: input.paymentMethod,
       status: input.status,
       totalPrice: userCart?.cart.totalPrice,
@@ -291,7 +293,7 @@ const getAllOrder = async (req, res) => {
     const orders = await orderModel
       .find()
       .populate({ path: "orderedBy", select: "-password" })
-      .populate("variants");
+      .populate("orderDetail.variant");
     return res.status(200).json({ orders });
   } catch (error) {
     console.log(error);
