@@ -17,7 +17,7 @@ userRouter.put("/:id",authentication, updateUser)
 userRouter.delete("/:id",authentication, authorization, deleteUser)    
 userRouter.get("/",authentication,authorization, getAllUser)
 userRouter.get("/refeshToken/:id", refeshToken)  
-userRouter.get("/:id",authentication, authorization, getUserById)
+userRouter.get("/:id", getUserById)
 userRouter.delete("/logout/:id",authentication, authorization, logOut)
 
 
